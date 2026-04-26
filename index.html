@@ -71,48 +71,35 @@ body.modal-open {
   align-items: flex-start;
 }
 
-.settings-shell {
+.setup-shell {
   width: auto;
 }
 
-.settings-header {
+.topbar-tabs {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  gap: 8px;
+  padding: 0;
 }
 
-.settings-trigger {
-  min-width: 148px;
+.topbar-tab {
+  width: auto;
+  margin: 0;
   background: #1f2937;
-  color: #cbd5e1;
-  border: 1px solid #334155;
-  box-shadow: none;
-}
-
-.settings-trigger:hover {
-  background: #273449;
-  color: #ffffff;
-}
-
-.settings-trigger::after {
-  content: " ▾";
-  font-size: 0.82rem;
-}
-
-.settings-trigger[aria-expanded="true"]::after {
-  content: " ▴";
-}
-
-.settings-status {
-  display: none;
-  margin: 8px 0 0;
-  text-align: center;
   color: var(--text-dim);
-  font-size: 0.82rem;
+  border: 1px solid #374151;
+  padding: 8px 12px;
+  white-space: nowrap;
 }
 
-.settings-status.needs-data {
-  color: #93c5fd;
+.topbar-tab:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.topbar-tab.active {
+  background: #1f2937;
+  color: var(--text-dim);
+  border-color: #374151;
 }
 
 .settings-panel {
@@ -157,36 +144,8 @@ h1 {
   padding: 12px;
 }
 
-.setup-tabs {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding: 2px;
-  border-bottom: 1px solid var(--border);
-}
-
-.setup-tab {
-  width: auto;
-  margin: 0;
-  background: #1f2937;
-  color: var(--text-dim);
-  border: 1px solid #374151;
-  padding: 8px 12px;
-}
-
-.setup-tab:hover {
-  background: var(--border);
-  color: var(--text);
-}
-
-.setup-tab.active {
-  background: var(--blue-strong);
-  border-color: var(--blue-strong);
-  color: #ffffff;
-}
-
 .setup-content {
-  padding: 14px 8px 6px;
+  padding: 8px;
   max-width: 1120px;
   margin: 0 auto;
 }
@@ -949,6 +908,14 @@ button.danger:hover {
     max-width: none;
   }
 
+  .topbar-tabs {
+    gap: 6px;
+  }
+
+  .topbar-tab {
+    padding: 8px 10px;
+  }
+
   .rule-row {
     grid-template-columns: 1fr;
   }
@@ -1002,12 +969,15 @@ button.danger:hover {
     justify-content: flex-end;
   }
 
-  .settings-trigger {
-    width: auto;
+  .topbar-tabs {
+    justify-content: flex-end;
   }
 
-  .settings-status {
-    text-align: right;
+  .topbar-tab {
+    width: auto;
+    min-width: 0;
+    padding-inline: 9px;
+    font-size: 0.82rem;
   }
 
   .settings-panel {
@@ -1028,15 +998,6 @@ button.danger:hover {
     min-width: 0;
     width: 100%;
     padding-inline: 10px;
-  }
-
-  .setup-tabs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .setup-tab {
-    width: 100%;
   }
 
   .setup-section.rules-section {
@@ -1204,21 +1165,16 @@ button.danger:hover {
       <p class="eyebrow">Builder Operations</p>
     </div>
     <div class="topbar-actions">
-      <div id="settingsShell" class="settings-shell">
-        <div class="settings-header">
-          <button id="settingsToggle" class="settings-trigger" type="button" aria-expanded="false" aria-controls="settingsPanel">Settings</button>
-          <p id="settingsStatus" class="settings-status needs-data">No data loaded</p>
+      <div id="setupShell" class="setup-shell" hidden>
+        <div class="topbar-tabs" role="tablist" aria-label="Dashboard setup tabs">
+          <button class="topbar-tab active" data-tab-target="tab-data" type="button">Data Source</button>
+          <button class="topbar-tab" data-tab-target="tab-rules" type="button">Lead-Time Rules</button>
         </div>
       </div>
     </div>
   </header>
 
   <section id="settingsPanel" class="panel setup-panel settings-panel" hidden>
-    <div class="setup-tabs" role="tablist" aria-label="Dashboard setup tabs">
-      <button class="setup-tab active" data-tab-target="tab-data" type="button">Data Source</button>
-      <button class="setup-tab" data-tab-target="tab-rules" type="button">Lead-Time Rules</button>
-    </div>
-
     <div class="setup-content">
       <div id="tab-data" class="tab-panel active">
         <div class="setup-section">
@@ -1302,10 +1258,8 @@ const uploadModal = document.getElementById("uploadModal");
 const rulesContainer = document.getElementById("rulesContainer");
 const addRuleBtn = document.getElementById("addRuleBtn");
 const resetRulesBtn = document.getElementById("resetRulesBtn");
-const settingsToggle = document.getElementById("settingsToggle");
 const settingsPanel = document.getElementById("settingsPanel");
-const settingsStatus = document.getElementById("settingsStatus");
-const settingsShell = document.getElementById("settingsShell");
+const setupShell = document.getElementById("setupShell");
 const dashboard = document.getElementById("dashboard");
 const summary = document.getElementById("summary");
 const metrics = document.getElementById("metrics");
@@ -1315,7 +1269,7 @@ const lotSearch = document.getElementById("lotSearch");
 const clearFiltersBtn = document.getElementById("clearFiltersBtn");
 const expandAllBtn = document.getElementById("expandAllBtn");
 const collapseAllBtn = document.getElementById("collapseAllBtn");
-const setupTabs = [...document.querySelectorAll(".setup-tab")];
+const topbarTabs = [...document.querySelectorAll(".topbar-tab")];
 const RULES_STORAGE_KEY = "builder_dashboard_rules";
 const LEGACY_WORKBOOK_STORAGE_KEYS = [
   "builder_dashboard_workbook_base64",
@@ -1370,10 +1324,6 @@ fileInputSettings.addEventListener("change", async (event) => {
   const file = event.target.files?.[0];
   updateSelectedFileName(file?.name || "");
   await handleWorkbookFile(file);
-});
-
-settingsToggle.addEventListener("click", () => {
-  setSettingsOpen(settingsPanel.hidden);
 });
 
 addRuleBtn.addEventListener("click", () => {
@@ -1455,11 +1405,45 @@ dashboard.addEventListener("click", (event) => {
   button.setAttribute("aria-expanded", String(!nextHidden));
 });
 
-for (const tab of setupTabs) {
+for (const tab of topbarTabs) {
   tab.addEventListener("click", () => {
-    activateTab(tab.dataset.tabTarget);
+    if (rows.length === 0) {
+      return;
+    }
+
+    const targetId = tab.dataset.tabTarget;
+    const activeTab = topbarTabs.find((item) => item.classList.contains("active"));
+    const isSameActiveTab = activeTab && activeTab.dataset.tabTarget === targetId;
+
+    if (!settingsPanel.hidden && isSameActiveTab) {
+      settingsPanel.hidden = true;
+      return;
+    }
+
+    activateTab(targetId);
+    settingsPanel.hidden = false;
   });
 }
+
+document.addEventListener("click", (event) => {
+  if (rows.length === 0 || settingsPanel.hidden) {
+    return;
+  }
+
+  const clickedInsidePanel = settingsPanel.contains(event.target);
+  const clickedTabButton = topbarTabs.some((tab) => tab.contains(event.target));
+  if (clickedInsidePanel || clickedTabButton) {
+    return;
+  }
+
+  settingsPanel.hidden = true;
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !settingsPanel.hidden) {
+    settingsPanel.hidden = true;
+  }
+});
 
 expandAllBtn.addEventListener("click", () => {
   [...dashboard.querySelectorAll("details.subdivision, details.lot-card")].forEach((el) => {
@@ -1476,7 +1460,7 @@ collapseAllBtn.addEventListener("click", () => {
 renderEmpty("Upload your Excel sheet to generate the dashboard.");
 
 function activateTab(targetId) {
-  setupTabs.forEach((tab) => {
+  topbarTabs.forEach((tab) => {
     tab.classList.toggle("active", tab.dataset.tabTarget === targetId);
   });
   document.querySelectorAll(".tab-panel").forEach((panel) => {
@@ -1484,17 +1468,10 @@ function activateTab(targetId) {
   });
 }
 
-function setSettingsOpen(isOpen) {
-  settingsPanel.hidden = !isOpen;
-  settingsToggle.setAttribute("aria-expanded", String(isOpen));
-}
-
 function setSetupState(hasData) {
-  settingsStatus.textContent = hasData ? "Data loaded" : "No data loaded";
-  settingsStatus.classList.toggle("needs-data", !hasData);
   resultsPanel.classList.toggle("no-data", !hasData);
-  settingsShell.hidden = !hasData;
-  settingsPanel.hidden = !hasData;
+  setupShell.hidden = !hasData;
+  settingsPanel.hidden = true;
   resultsPanel.hidden = !hasData;
   uploadModal.hidden = hasData;
   document.body.classList.toggle("modal-open", !hasData);
@@ -1505,7 +1482,6 @@ function setSetupState(hasData) {
   collapseAllBtn.disabled = !hasData;
 
   if (hasData) {
-    setSettingsOpen(false);
     return;
   }
 
