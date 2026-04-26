@@ -81,6 +81,27 @@ body.modal-open {
   padding: 0;
 }
 
+.history-btn {
+  width: auto;
+  min-width: 42px;
+  margin: 0;
+  background: #1f2937;
+  color: var(--text-dim);
+  border: 1px solid #374151;
+  padding: 8px 10px;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.history-btn:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.history-btn:disabled {
+  opacity: 0.45;
+}
+
 .topbar-tab {
   width: auto;
   margin: 0;
@@ -201,6 +222,54 @@ h1 {
 .rules-actions .secondary {
   width: auto;
   margin-bottom: 0;
+}
+
+.transfer-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.transfer-actions .secondary {
+  width: auto;
+  margin-bottom: 0;
+}
+
+.transfer-mode {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 0.86rem;
+}
+
+.transfer-mode select {
+  width: auto;
+  min-width: 160px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-alt);
+  color: var(--text);
+}
+
+.transfer-status {
+  margin: 8px 0 0;
+  min-height: 1.2em;
+  font-size: 0.84rem;
+  color: var(--text-dim);
+}
+
+.transfer-status.success {
+  color: #86efac;
+}
+
+.transfer-status.error {
+  color: #fca5a5;
 }
 
 .panel {
@@ -378,7 +447,7 @@ button.danger:hover {
 
 .rule-row {
   display: grid;
-  grid-template-columns: minmax(160px, 220px) minmax(260px, 1fr) 64px auto;
+  grid-template-columns: minmax(160px, 220px) minmax(260px, 1fr) 78px 96px auto;
   gap: 8px;
 }
 
@@ -395,10 +464,15 @@ button.danger:hover {
 }
 
 .remove-rule {
+  grid-column: 5;
+}
+
+.rule-unit {
   grid-column: 4;
 }
 
-.rule-row input {
+.rule-row input,
+.rule-row select {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--border);
@@ -506,7 +580,8 @@ button.danger:hover {
 
 .command-bar input:focus,
 .command-bar select:focus,
-.rule-row input:focus {
+.rule-row input:focus,
+.rule-row select:focus {
   outline: none;
   border-color: var(--blue-strong);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
@@ -702,6 +777,44 @@ button.danger:hover {
   margin-bottom: 6px;
 }
 
+.lot-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lot-complete-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+.lot-complete-control input {
+  margin: 0;
+  accent-color: #94a3b8;
+}
+
+.lot-card.lot-complete {
+  opacity: 0.62;
+  box-shadow: inset 4px 0 0 #64748b;
+}
+
+.lot-card.lot-complete:hover {
+  transform: none;
+  border-color: var(--border);
+}
+
+.status-complete {
+  background: rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+}
+
 .lot-name {
   margin: 0;
   font-size: 1.02rem;
@@ -863,7 +976,7 @@ button.danger:hover {
   }
 
   .rule-row {
-    grid-template-columns: minmax(160px, 1fr) 64px auto;
+    grid-template-columns: minmax(160px, 1fr) 78px 96px auto;
   }
 
   .rule-keywords {
@@ -916,6 +1029,11 @@ button.danger:hover {
     padding: 8px 10px;
   }
 
+  .history-btn {
+    padding: 8px;
+    min-width: 38px;
+  }
+
   .rule-row {
     grid-template-columns: 1fr;
   }
@@ -923,6 +1041,7 @@ button.danger:hover {
   .rule-label,
   .rule-keywords,
   .rule-weeks,
+  .rule-unit,
   .remove-rule {
     grid-column: auto;
   }
@@ -978,6 +1097,12 @@ button.danger:hover {
     min-width: 0;
     padding-inline: 9px;
     font-size: 0.82rem;
+  }
+
+  .history-btn {
+    min-width: 36px;
+    padding: 8px 6px;
+    font-size: 0.92rem;
   }
 
   .settings-panel {
@@ -1167,6 +1292,8 @@ button.danger:hover {
     <div class="topbar-actions">
       <div id="setupShell" class="setup-shell" hidden>
         <div class="topbar-tabs" role="tablist" aria-label="Dashboard setup tabs">
+          <button id="undoBtn" class="history-btn" type="button" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>&#8634;</button>
+          <button id="redoBtn" class="history-btn" type="button" title="Redo (Ctrl+Shift+Z)" aria-label="Redo" disabled>&#8635;</button>
           <button class="topbar-tab active" data-tab-target="tab-data" type="button">Data Source</button>
           <button class="topbar-tab" data-tab-target="tab-rules" type="button">Lead-Time Rules</button>
         </div>
@@ -1187,12 +1314,25 @@ button.danger:hover {
               <span id="selectedFileSettings" class="file-name">No file selected</span>
             </div>
           </label>
+          <input id="completedListImportInput" class="file-picker-control" type="file" accept="application/json,.json" />
+          <div class="transfer-actions">
+            <button id="exportCompletedBtn" class="secondary" type="button">Export Completed List</button>
+            <button id="importCompletedBtn" class="secondary" type="button">Import Completed List</button>
+          </div>
+          <label class="transfer-mode" for="completedImportMode">
+            <span>Import Mode</span>
+            <select id="completedImportMode">
+              <option value="replace">Replace current completed list</option>
+              <option value="merge">Merge with current completed list</option>
+            </select>
+          </label>
+          <p id="transferStatus" class="transfer-status" aria-live="polite"></p>
         </div>
       </div>
 
       <div id="tab-rules" class="tab-panel">
         <div class="setup-section rules-section">
-          <h2>Lead-Time Rules (Weeks)</h2>
+          <h2>Lead-Time Rules</h2>
           <p class="hint">Tasks are matched by keyword. If a task start date is inside the lead-time window, it is marked at risk.</p>
           <div id="rulesContainer" class="rules"></div>
           <div class="rules-actions">
@@ -1203,7 +1343,7 @@ button.danger:hover {
             <h3>Color Legend</h3>
             <div><span class="swatch overdue"></span> Late / Started too soon</div>
             <div><span class="swatch risk"></span> At risk (inside lead-time window)</div>
-            <div><span class="swatch watch"></span> Watch list (within 2 weeks after lead time)</div>
+            <div><span class="swatch watch"></span> Watch list (within 14 days after lead time)</div>
             <div><span class="swatch safe"></span> Safe</div>
           </div>
         </div>
@@ -1231,7 +1371,11 @@ button.danger:hover {
     <div class="rule-row">
       <input type="text" class="rule-label" placeholder="Rule label (e.g. Windows & Doors)" />
       <input type="text" class="rule-keywords" placeholder="Keywords (comma separated)" />
-      <input type="number" class="rule-weeks" min="1" max="52" value="6" />
+      <input type="number" class="rule-weeks" min="1" max="365" value="21" />
+      <select class="rule-unit" aria-label="Lead-time unit">
+        <option value="days">Days</option>
+        <option value="weeks">Weeks</option>
+      </select>
       <button class="danger remove-rule" type="button">Remove</button>
     </div>
   </template>
@@ -1254,12 +1398,19 @@ const chooseFileModalBtn = document.getElementById("chooseFileModalBtn");
 const chooseFileSettingsBtn = document.getElementById("chooseFileSettingsBtn");
 const selectedFileModal = document.getElementById("selectedFileModal");
 const selectedFileSettings = document.getElementById("selectedFileSettings");
+const exportCompletedBtn = document.getElementById("exportCompletedBtn");
+const importCompletedBtn = document.getElementById("importCompletedBtn");
+const completedListImportInput = document.getElementById("completedListImportInput");
+const completedImportMode = document.getElementById("completedImportMode");
+const transferStatus = document.getElementById("transferStatus");
 const uploadModal = document.getElementById("uploadModal");
 const rulesContainer = document.getElementById("rulesContainer");
 const addRuleBtn = document.getElementById("addRuleBtn");
 const resetRulesBtn = document.getElementById("resetRulesBtn");
 const settingsPanel = document.getElementById("settingsPanel");
 const setupShell = document.getElementById("setupShell");
+const undoBtn = document.getElementById("undoBtn");
+const redoBtn = document.getElementById("redoBtn");
 const dashboard = document.getElementById("dashboard");
 const summary = document.getElementById("summary");
 const metrics = document.getElementById("metrics");
@@ -1271,6 +1422,7 @@ const expandAllBtn = document.getElementById("expandAllBtn");
 const collapseAllBtn = document.getElementById("collapseAllBtn");
 const topbarTabs = [...document.querySelectorAll(".topbar-tab")];
 const RULES_STORAGE_KEY = "builder_dashboard_rules";
+const LOT_COMPLETION_STORAGE_KEY = "builder_dashboard_completed_lots";
 const LEGACY_WORKBOOK_STORAGE_KEYS = [
   "builder_dashboard_workbook_base64",
   "builder_dashboard_workbook_name"
@@ -1279,27 +1431,82 @@ const LEGACY_WORKBOOK_STORAGE_KEYS = [
 let rows = [];
 let currentSourceName = "Uploaded file";
 let activeStatusFilter = "all";
+let completedLotKeys = restoreCompletedLots();
+let completionUndoStack = [];
+let completionRedoStack = [];
 
 const defaultRules = [
   {
-    label: "Windows",
-    keywords: "window material and install, window material, window install, windows install",
-    weeks: 6
+    label: "Screens",
+    keywords: "screen, screens",
+    amount: 1,
+    unit: "days"
   },
   {
-    label: "Doors",
-    keywords: "exterior door install, exterior doors install, exterior door, exterior doors, sliding glass door",
-    weeks: 3
+    label: "Punch / Warranty",
+    keywords: "punch, punchout, warranty, repair, replace, threshold",
+    amount: 2,
+    unit: "days"
+  },
+  {
+    label: "Windows",
+    keywords: "window, windows, glass",
+    amount: 21,
+    unit: "days"
+  },
+  {
+    label: "Exterior Doors",
+    keywords: "exterior door, exterior doors, sliding glass door, back door, front door",
+    amount: 14,
+    unit: "days"
   },
   {
     label: "Stairs",
-    keywords: "main stairs turnkey, stairs turnkey, main stairs, stairs",
-    weeks: 3
+    keywords: "stairs, stair",
+    amount: 21,
+    unit: "days"
   },
   {
-    label: "Lumber",
-    keywords: "framing 1st draw, frame 3 cornice, panels 1st drop, drop floor system, roof truss, truss, weather barrier house wrap, house wrap, screens",
-    weeks: 2
+    label: "Roof / Truss / Sheathing",
+    keywords: "roof, truss, trusses, sheathing, bracing",
+    amount: 14,
+    unit: "days"
+  },
+  {
+    label: "Framing / Lumber / Floor System",
+    keywords: "framing, frame, lumber, joist, joists, floor system, i-joist, panels, wall package",
+    amount: 10,
+    unit: "days"
+  },
+  {
+    label: "Weather Barrier",
+    keywords: "house wrap, housewrap, tyvek, weather barrier",
+    amount: 7,
+    unit: "days"
+  },
+  {
+    label: "Interior Trim / Millwork",
+    keywords: "interior trim, trim, molding, mill, carpentry, shoe",
+    amount: 5,
+    unit: "days"
+  },
+  {
+    label: "Hardware / Final",
+    keywords: "hardware, final",
+    amount: 5,
+    unit: "days"
+  },
+  {
+    label: "Material / Delivery",
+    keywords: "deliver, delivery, material, package, drop",
+    amount: 7,
+    unit: "days"
+  },
+  {
+    label: "General",
+    keywords: "",
+    amount: 2,
+    unit: "weeks"
   }
 ];
 
@@ -1312,6 +1519,27 @@ chooseFileModalBtn.addEventListener("click", () => {
 
 chooseFileSettingsBtn.addEventListener("click", () => {
   fileInputSettings.click();
+});
+
+exportCompletedBtn.addEventListener("click", () => {
+  exportCompletedLots();
+});
+
+importCompletedBtn.addEventListener("click", () => {
+  completedListImportInput.click();
+});
+
+completedListImportInput.addEventListener("change", async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) {
+    return;
+  }
+
+  try {
+    await importCompletedLots(file, completedImportMode.value);
+  } finally {
+    completedListImportInput.value = "";
+  }
 });
 
 fileInputModal.addEventListener("change", async (event) => {
@@ -1327,7 +1555,7 @@ fileInputSettings.addEventListener("change", async (event) => {
 });
 
 addRuleBtn.addEventListener("click", () => {
-  appendRuleRow({ label: "", keywords: "", weeks: 6 });
+  appendRuleRow({ label: "", keywords: "", amount: 2, unit: "weeks" });
   persistRules();
 });
 
@@ -1376,6 +1604,14 @@ clearFiltersBtn.addEventListener("click", () => {
   }
 });
 
+undoBtn.addEventListener("click", () => {
+  undoCompletionChange();
+});
+
+redoBtn.addEventListener("click", () => {
+  redoCompletionChange();
+});
+
 metrics.addEventListener("click", (event) => {
   const button = event.target.closest("button.metric-card[data-status]");
   if (!button) {
@@ -1390,6 +1626,11 @@ metrics.addEventListener("click", (event) => {
 });
 
 dashboard.addEventListener("click", (event) => {
+  if (event.target.closest(".lot-complete-control")) {
+    event.stopPropagation();
+    return;
+  }
+
   const button = event.target.closest(".task-name-button[data-task-detail-id]");
   if (!button) {
     return;
@@ -1403,6 +1644,44 @@ dashboard.addEventListener("click", (event) => {
   const nextHidden = !detail.hidden;
   detail.hidden = nextHidden;
   button.setAttribute("aria-expanded", String(!nextHidden));
+});
+
+dashboard.addEventListener("change", (event) => {
+  const toggle = event.target.closest(".lot-complete-toggle");
+  if (!toggle) {
+    return;
+  }
+
+  const lotKey = toggle.dataset.lotKey;
+  if (!lotKey) {
+    return;
+  }
+
+  const previousCompleted = completedLotKeys.has(lotKey);
+
+  if (toggle.checked) {
+    completedLotKeys.add(lotKey);
+  } else {
+    completedLotKeys.delete(lotKey);
+  }
+
+  const nextCompleted = completedLotKeys.has(lotKey);
+  if (nextCompleted === previousCompleted) {
+    return;
+  }
+
+  completionUndoStack.push({
+    lotKey,
+    previousCompleted,
+    nextCompleted
+  });
+  completionRedoStack = [];
+  updateCompletionHistoryControls();
+
+  persistCompletedLots();
+  if (rows.length > 0) {
+    renderDashboard(rows, currentSourceName);
+  }
 });
 
 for (const tab of topbarTabs) {
@@ -1430,8 +1709,9 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  const clickedInsidePanel = settingsPanel.contains(event.target);
-  const clickedTabButton = topbarTabs.some((tab) => tab.contains(event.target));
+  const path = typeof event.composedPath === "function" ? event.composedPath() : [];
+  const clickedInsidePanel = path.includes(settingsPanel) || settingsPanel.contains(event.target);
+  const clickedTabButton = topbarTabs.some((tab) => path.includes(tab) || tab.contains(event.target));
   if (clickedInsidePanel || clickedTabButton) {
     return;
   }
@@ -1442,6 +1722,22 @@ document.addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !settingsPanel.hidden) {
     settingsPanel.hidden = true;
+    return;
+  }
+
+  if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== "z") {
+    return;
+  }
+
+  if (isEditableTarget(event.target)) {
+    return;
+  }
+
+  event.preventDefault();
+  if (event.shiftKey) {
+    redoCompletionChange();
+  } else {
+    undoCompletionChange();
   }
 });
 
@@ -1471,7 +1767,9 @@ function activateTab(targetId) {
 function setSetupState(hasData) {
   resultsPanel.classList.toggle("no-data", !hasData);
   setupShell.hidden = !hasData;
-  settingsPanel.hidden = true;
+  if (!hasData) {
+    settingsPanel.hidden = true;
+  }
   resultsPanel.hidden = !hasData;
   uploadModal.hidden = hasData;
   document.body.classList.toggle("modal-open", !hasData);
@@ -1480,6 +1778,8 @@ function setSetupState(hasData) {
   clearFiltersBtn.disabled = !hasData;
   expandAllBtn.disabled = !hasData;
   collapseAllBtn.disabled = !hasData;
+  undoBtn.disabled = !hasData || completionUndoStack.length === 0;
+  redoBtn.disabled = !hasData || completionRedoStack.length === 0;
 
   if (hasData) {
     return;
@@ -1517,9 +1817,26 @@ async function handleWorkbookFile(file) {
 function appendRuleRow(rule) {
   const fragment = ruleTemplate.content.cloneNode(true);
   const row = fragment.querySelector(".rule-row");
+  const amount = Number(rule.amount);
+  const fallbackFromDays = Number(rule.days);
+  const fallbackFromWeeks = Number(rule.weeks);
+  let resolvedAmount = 0;
+  let resolvedUnit = "days";
+
+  if (Number.isFinite(amount) && amount > 0) {
+    resolvedAmount = amount;
+    resolvedUnit = rule.unit === "weeks" ? "weeks" : "days";
+  } else if (Number.isFinite(fallbackFromDays) && fallbackFromDays > 0) {
+    resolvedAmount = fallbackFromDays;
+  } else if (Number.isFinite(fallbackFromWeeks) && fallbackFromWeeks > 0) {
+    resolvedAmount = fallbackFromWeeks;
+    resolvedUnit = "weeks";
+  }
+
   row.querySelector(".rule-label").value = rule.label;
   row.querySelector(".rule-keywords").value = rule.keywords;
-  row.querySelector(".rule-weeks").value = rule.weeks;
+  row.querySelector(".rule-weeks").value = resolvedAmount || 1;
+  row.querySelector(".rule-unit").value = resolvedUnit;
   rulesContainer.appendChild(fragment);
 }
 
@@ -1550,10 +1867,18 @@ function getRules() {
         .value.split(",")
         .map((x) => x.trim().toLowerCase())
         .filter(Boolean);
-      const weeks = Number(el.querySelector(".rule-weeks").value);
-      return { label, keywords, weeks: Number.isFinite(weeks) ? weeks : 0 };
+      const amount = Number(el.querySelector(".rule-weeks").value);
+      const unit = el.querySelector(".rule-unit").value === "weeks" ? "weeks" : "days";
+      const days = convertLeadToDays(amount, unit);
+      return {
+        label,
+        keywords,
+        amount: Number.isFinite(amount) ? amount : 0,
+        unit,
+        days
+      };
     })
-    .filter((rule) => rule.weeks > 0);
+    .filter((rule) => rule.days > 0);
 }
 
 function loadWorkbookFromArrayBuffer(buffer, sourceName) {
@@ -1573,6 +1898,9 @@ function loadWorkbookFromArrayBuffer(buffer, sourceName) {
 
   rows = parsedRows;
   currentSourceName = sourceName;
+  completionUndoStack = [];
+  completionRedoStack = [];
+  updateCompletionHistoryControls();
   renderDashboard(rows, sourceName);
 }
 
@@ -1602,6 +1930,17 @@ function renderDashboard(dataRows, sourceName = "Uploaded file") {
     <button type="button" class="metric-card metric-safe ${statusValue === "safe" ? "active" : ""}" data-status="safe"><p>Safe Lots</p><h3>${severityCounts.safe}</h3></button>
   `;
 
+  const openSubdivisionKeys = new Set(
+    [...dashboard.querySelectorAll("details.subdivision[open]")]
+      .map((el) => el.dataset.subdivisionKey)
+      .filter(Boolean)
+  );
+  const openLotKeys = new Set(
+    [...dashboard.querySelectorAll("details.lot-card[open]")]
+      .map((el) => el.dataset.lotKey)
+      .filter(Boolean)
+  );
+
   dashboard.innerHTML = "";
 
   let renderedSubdivisionCount = 0;
@@ -1609,6 +1948,10 @@ function renderDashboard(dataRows, sourceName = "Uploaded file") {
 
   for (const subdivision of grouped.subdivisions) {
     const visibleLots = subdivision.lots.filter((lot) => {
+      if (lot.completed && statusValue !== "all") {
+        return false;
+      }
+
       const matchesStatus = statusValue === "all" || lot.lotSeverity.css === statusValue;
       if (!matchesStatus) {
         return false;
@@ -1623,6 +1966,12 @@ function renderDashboard(dataRows, sourceName = "Uploaded file") {
       const subdivisionMatch = subdivision.name.toLowerCase().includes(filterText);
       const taskMatch = lot.tasks.some((task) => task.taskName.toLowerCase().includes(filterText));
       return lotNameMatch || lotDisplayMatch || subdivisionMatch || taskMatch;
+    })
+    .sort((a, b) => {
+      if (a.completed !== b.completed) {
+        return Number(a.completed) - Number(b.completed);
+      }
+      return a.name.localeCompare(b.name, undefined, { numeric: true });
     });
 
     if (visibleLots.length === 0) {
@@ -1634,15 +1983,24 @@ function renderDashboard(dataRows, sourceName = "Uploaded file") {
 
     const details = document.createElement("details");
     details.className = "subdivision";
+    const subdivisionKey = getSubdivisionKey(builderName, subdivision.name);
+    details.dataset.subdivisionKey = subdivisionKey;
+    details.open = openSubdivisionKeys.has(subdivisionKey);
 
-    const subdivisionSeverity = subdivision.maxSeverity;
+    const activeLots = visibleLots.filter((lot) => !lot.completed);
+    const subdivisionSeverity = activeLots.reduce((maxSeverity, lot) => {
+      return lot.lotSeverity.rank > maxSeverity.rank ? lot.lotSeverity : maxSeverity;
+    }, severityDefinitions.safe);
+    const subdivisionIsComplete = activeLots.length === 0 && visibleLots.length > 0;
+    const subdivisionBadgeClass = subdivisionIsComplete ? "status-complete" : `status-${subdivisionSeverity.css}`;
+    const subdivisionBadgeLabel = subdivisionIsComplete ? "Complete" : subdivisionSeverity.label;
     details.innerHTML = `
       <summary>
         <div class="subdivision-title-wrap">
           <h3>${escapeHtml(subdivision.name)}</h3>
           <p>${visibleLots.length} lots</p>
         </div>
-        <span class="badge status-${subdivisionSeverity.css}">${subdivisionSeverity.label}</span>
+        <span class="badge ${subdivisionBadgeClass}">${subdivisionBadgeLabel}</span>
       </summary>
       <div class="lots-grid"></div>
     `;
@@ -1651,12 +2009,25 @@ function renderDashboard(dataRows, sourceName = "Uploaded file") {
 
     for (const lot of visibleLots) {
       const lotCard = document.createElement("details");
-      lotCard.className = `lot-card lot-${lot.lotSeverity.css}`;
+      lotCard.className = `lot-card lot-${lot.lotSeverity.css}${lot.completed ? " lot-complete" : ""}`;
+      lotCard.dataset.lotKey = lot.key;
+      lotCard.open = openLotKeys.has(lot.key);
       lotCard.innerHTML = `
         <summary>
           <div class="lot-head">
             <h3 class="lot-name">Lot ${escapeHtml(lot.displayName)}</h3>
-            <span class="badge status-${lot.lotSeverity.css}">${lot.lotSeverity.label}</span>
+            <div class="lot-head-actions">
+              <label class="lot-complete-control">
+                <input
+                  type="checkbox"
+                  class="lot-complete-toggle"
+                  data-lot-key="${escapeHtml(lot.key)}"
+                  ${lot.completed ? "checked" : ""}
+                />
+                <span>Complete</span>
+              </label>
+              <span class="badge ${lot.completed ? "status-complete" : `status-${lot.lotSeverity.css}`}">${lot.completed ? "Complete" : lot.lotSeverity.label}</span>
+            </div>
           </div>
           <p class="lot-meta">Earliest start: ${escapeHtml(lot.earliestStartDisplay)} · ${escapeHtml(lot.earliestTaskName)}</p>
         </summary>
@@ -1735,15 +2106,18 @@ function groupRows(dataRows, rules) {
 
     const subdivision = bySubdivision.get(subdivisionName);
     if (!subdivision.lots.has(lotName)) {
+      const lotKey = getLotCompletionKey(builderName, subdivisionName, lotName);
       subdivision.lots.set(lotName, {
         name: lotName,
+        key: lotKey,
+        completed: completedLotKeys.has(lotKey),
         tasks: []
       });
     }
 
     const lot = subdivision.lots.get(lotName);
     const match = getRuleMatch(taskName, rules);
-    const severity = evaluateSeverity(requestedStartDate, match.weeks);
+    const severity = evaluateSeverity(requestedStartDate, match.days);
 
     lot.tasks.push({
       taskName,
@@ -1807,15 +2181,14 @@ const severityDefinitions = {
   overdue: { rank: 4, label: "Late", css: "overdue" }
 };
 
-function evaluateSeverity(startDate, leadWeeks) {
-  if (!startDate || !Number.isFinite(leadWeeks) || leadWeeks <= 0) {
+function evaluateSeverity(startDate, leadDays) {
+  if (!startDate || !Number.isFinite(leadDays) || leadDays <= 0) {
     return severityDefinitions.safe;
   }
 
   const now = new Date();
   const dayMs = 24 * 60 * 60 * 1000;
   const daysUntilStart = Math.floor((startDate - now) / dayMs);
-  const leadDays = leadWeeks * 7;
 
   if (daysUntilStart < 0) {
     return severityDefinitions.overdue;
@@ -1827,6 +2200,14 @@ function evaluateSeverity(startDate, leadWeeks) {
     return severityDefinitions.watch;
   }
   return severityDefinitions.safe;
+}
+
+function convertLeadToDays(amount, unit) {
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return 0;
+  }
+
+  return unit === "weeks" ? amount * 7 : amount;
 }
 
 function getRuleMatch(taskName, rules) {
@@ -1841,7 +2222,19 @@ function getRuleMatch(taskName, rules) {
   }
 
   const general = rules.find((rule) => rule.keywords.length === 0);
-  return general || { label: "No Rule", weeks: 4 };
+  return general || { label: "No Rule", days: 14 };
+}
+
+function getLotCompletionKey(builderName, subdivisionName, lotName) {
+  return [builderName, subdivisionName, lotName]
+    .map((value) => String(value || "").trim().toLowerCase())
+    .join("||");
+}
+
+function getSubdivisionKey(builderName, subdivisionName) {
+  return [builderName, subdivisionName]
+    .map((value) => String(value || "").trim().toLowerCase())
+    .join("||");
 }
 
 function parseDate(value) {
@@ -1899,6 +2292,9 @@ function countSeverityByLots(subdivisions) {
 
   for (const subdivision of subdivisions) {
     for (const lot of subdivision.lots) {
+      if (lot.completed) {
+        continue;
+      }
       counts[lot.lotSeverity.css] += 1;
     }
   }
@@ -1932,12 +2328,210 @@ function restoreRules() {
         keywords: Array.isArray(rule.keywords)
           ? rule.keywords.join(", ")
           : String(rule.keywords || "").trim(),
-        weeks: Number(rule.weeks) || 0
+        amount: (() => {
+          const explicitAmount = Number(rule.amount);
+          if (Number.isFinite(explicitAmount) && explicitAmount > 0) {
+            return explicitAmount;
+          }
+
+          const explicitDays = Number(rule.days);
+          if (Number.isFinite(explicitDays) && explicitDays > 0) {
+            return explicitDays;
+          }
+
+          const legacyWeeks = Number(rule.weeks);
+          if (Number.isFinite(legacyWeeks) && legacyWeeks > 0) {
+            return legacyWeeks;
+          }
+
+          return 0;
+        })(),
+        unit: (() => {
+          if (rule.unit === "weeks" || rule.unit === "days") {
+            return rule.unit;
+          }
+
+          const hasDays = Number(rule.days) > 0;
+          if (hasDays) {
+            return "days";
+          }
+
+          return "weeks";
+        })(),
+        days: (() => {
+          const explicitDays = Number(rule.days);
+          if (Number.isFinite(explicitDays) && explicitDays > 0 && !(rule.unit === "weeks" || rule.unit === "days")) {
+            return explicitDays;
+          }
+
+          const amount = Number(rule.amount);
+          if (Number.isFinite(amount) && amount > 0) {
+            return convertLeadToDays(amount, rule.unit === "weeks" ? "weeks" : "days");
+          }
+
+          const legacyWeeks = Number(rule.weeks);
+          if (Number.isFinite(legacyWeeks) && legacyWeeks > 0) {
+            return convertLeadToDays(legacyWeeks, "weeks");
+          }
+
+          return convertLeadToDays(Number(rule.days), "days");
+        })()
       }))
-      .filter((rule) => rule.weeks > 0);
+      .filter((rule) => rule.days > 0);
   } catch (error) {
     console.error("Failed to restore rules:", error);
     return [];
+  }
+}
+
+function persistCompletedLots() {
+  try {
+    localStorage.setItem(LOT_COMPLETION_STORAGE_KEY, JSON.stringify([...completedLotKeys]));
+  } catch (error) {
+    console.error("Failed to persist completed lots:", error);
+  }
+}
+
+function exportCompletedLots() {
+  try {
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      completedLotKeys: [...completedLotKeys].sort()
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const dateTag = new Date().toISOString().slice(0, 10);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `builder-dashboard-completed-lots-${dateTag}.json`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+
+    setTransferStatus(`Exported ${completedLotKeys.size} completed lots.`, "success");
+  } catch (error) {
+    console.error("Failed to export completed lots:", error);
+    setTransferStatus("Could not export completed list.", "error");
+  }
+}
+
+async function importCompletedLots(file, mode = "replace") {
+  try {
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    const importedKeysRaw = Array.isArray(parsed)
+      ? parsed
+      : Array.isArray(parsed?.completedLotKeys)
+        ? parsed.completedLotKeys
+        : null;
+
+    if (!importedKeysRaw) {
+      throw new Error("Invalid completed list format.");
+    }
+
+    const importedSet = new Set(
+      importedKeysRaw
+        .map((key) => String(key || "").trim().toLowerCase())
+        .filter(Boolean)
+    );
+
+    if (mode === "merge") {
+      completedLotKeys = new Set([...completedLotKeys, ...importedSet]);
+    } else {
+      completedLotKeys = importedSet;
+    }
+
+    completionUndoStack = [];
+    completionRedoStack = [];
+
+    persistCompletedLots();
+    if (rows.length > 0) {
+      renderDashboard(rows, currentSourceName);
+    }
+    updateCompletionHistoryControls();
+
+    const modeLabel = mode === "merge" ? "Merged" : "Replaced with";
+    setTransferStatus(`${modeLabel} ${completedLotKeys.size} completed lots.`, "success");
+  } catch (error) {
+    console.error("Failed to import completed lots:", error);
+    setTransferStatus("Could not import completed list. Use a valid JSON export file.", "error");
+  }
+}
+
+function setTransferStatus(message, state) {
+  transferStatus.textContent = message;
+  transferStatus.classList.toggle("success", state === "success");
+  transferStatus.classList.toggle("error", state === "error");
+}
+
+function updateCompletionHistoryControls() {
+  const hasData = rows.length > 0;
+  undoBtn.disabled = !hasData || completionUndoStack.length === 0;
+  redoBtn.disabled = !hasData || completionRedoStack.length === 0;
+}
+
+function applyLotCompletion(lotKey, isCompleted) {
+  if (isCompleted) {
+    completedLotKeys.add(lotKey);
+  } else {
+    completedLotKeys.delete(lotKey);
+  }
+
+  persistCompletedLots();
+  if (rows.length > 0) {
+    renderDashboard(rows, currentSourceName);
+  }
+  updateCompletionHistoryControls();
+}
+
+function undoCompletionChange() {
+  if (completionUndoStack.length === 0) {
+    return;
+  }
+
+  const action = completionUndoStack.pop();
+  completionRedoStack.push(action);
+  applyLotCompletion(action.lotKey, action.previousCompleted);
+}
+
+function redoCompletionChange() {
+  if (completionRedoStack.length === 0) {
+    return;
+  }
+
+  const action = completionRedoStack.pop();
+  completionUndoStack.push(action);
+  applyLotCompletion(action.lotKey, action.nextCompleted);
+}
+
+function isEditableTarget(target) {
+  const el = target instanceof Element ? target : null;
+  if (!el) {
+    return false;
+  }
+
+  return Boolean(el.closest("input, textarea, select, [contenteditable='true']"));
+}
+
+function restoreCompletedLots() {
+  try {
+    const stored = localStorage.getItem(LOT_COMPLETION_STORAGE_KEY);
+    if (!stored) {
+      return new Set();
+    }
+
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) {
+      return new Set();
+    }
+
+    return new Set(parsed.map((key) => String(key)));
+  } catch (error) {
+    console.error("Failed to restore completed lots:", error);
+    return new Set();
   }
 }
 
