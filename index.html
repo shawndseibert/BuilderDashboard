@@ -1388,7 +1388,6 @@ const REQUIRED_COLUMNS = [
   "Lot / Block",
   "Task",
   "Requested Start Date",
-  "Actual Start Date",
   "Status"
 ];
 
@@ -1881,6 +1880,58 @@ function getRules() {
     .filter((rule) => rule.days > 0);
 }
 
+function detectColumns(firstRow) {
+  const columnMap = {};
+  const headers = Object.keys(firstRow);
+  
+  // Helper to find column by keyword matching
+  const findColumn = (keywords, fallback = null) => {
+    for (const header of headers) {
+      const lower = header.toLowerCase();
+      for (const keyword of keywords) {
+        if (lower.includes(keyword.toLowerCase())) {
+          return header;
+        }
+      }
+    }
+    return fallback;
+  };
+  
+  // Detect each required column
+  columnMap["Builder Name"] = findColumn(["builder"], "Builder");
+  columnMap["Subdivision"] = findColumn(["subdivision", "project"]);
+  columnMap["Lot / Block"] = findColumn(["lot", "block", "lot #"]);
+  columnMap["Task"] = findColumn(["task", "title"]);
+  
+  // For start date: prefer "Adjusted Start Date", then "Requested Start Date", then any date + start
+  columnMap["Adjusted Start Date"] = findColumn(["adjusted", "start", "date"]);
+  if (!columnMap["Adjusted Start Date"]) {
+    columnMap["Adjusted Start Date"] = findColumn(["scheduled", "date"]);
+  }
+  if (!columnMap["Adjusted Start Date"]) {
+    columnMap["Adjusted Start Date"] = findColumn(["start", "date"]);
+  }
+  if (!columnMap["Adjusted Start Date"]) {
+    columnMap["Adjusted Start Date"] = findColumn(["date"]);
+  }
+  
+  columnMap["Status"] = findColumn(["status"]);
+  
+  return columnMap;
+}
+
+function normalizeRow(row, columnMap) {
+  const normalized = {};
+  for (const [internalName, sourceColumn] of Object.entries(columnMap)) {
+    if (sourceColumn && sourceColumn in row) {
+      normalized[internalName] = row[sourceColumn];
+    } else {
+      normalized[internalName] = "";
+    }
+  }
+  return normalized;
+}
+
 function loadWorkbookFromArrayBuffer(buffer, sourceName) {
   const workbook = XLSX.read(buffer, { type: "array" });
   const sheetName = workbook.SheetNames[0];
@@ -1890,13 +1941,36 @@ function loadWorkbookFromArrayBuffer(buffer, sourceName) {
     raw: false
   });
 
-  const missing = REQUIRED_COLUMNS.filter((col) => !(col in (parsedRows[0] || {})));
-  if (missing.length > 0) {
-    renderEmpty(`Missing columns in ${sourceName}: ${missing.join(", ")}`);
+  if (!parsedRows.length) {
+    renderEmpty("No rows found in the spreadsheet.");
     return;
   }
 
-  rows = parsedRows;
+  // Detect columns from the first row
+  const columnMap = detectColumns(parsedRows[0]);
+  
+  // Validate that critical columns were found
+  if (!columnMap["Subdivision"]) {
+    renderEmpty(`Missing critical column: Subdivision (or "Project")`);
+    return;
+  }
+  if (!columnMap["Lot / Block"]) {
+    renderEmpty(`Missing critical column: Lot / Block (or "Lot #")`);
+    return;
+  }
+  if (!columnMap["Task"]) {
+    renderEmpty(`Missing critical column: Task (or "Title")`);
+    return;
+  }
+  if (!columnMap["Adjusted Start Date"]) {
+    renderEmpty(`Missing critical column: Start Date (Adjusted, Requested, Scheduled, or any date column)`);
+    return;
+  }
+
+  // Normalize all rows to use standard internal column names
+  const normalizedRows = parsedRows.map(row => normalizeRow(row, columnMap));
+
+  rows = normalizedRows;
   currentSourceName = sourceName;
   completionUndoStack = [];
   completionRedoStack = [];
@@ -2094,7 +2168,8 @@ function groupRows(dataRows, rules) {
     const subdivisionName = safeValue(row["Subdivision"]);
     const lotName = safeValue(row["Lot / Block"]);
     const taskName = safeValue(row["Task"]);
-    const requestedStartRaw = safeValue(row["Requested Start Date"]);
+    // All sheets are normalized to use "Adjusted Start Date" by detectColumns
+    const requestedStartRaw = safeValue(row["Adjusted Start Date"]);
     const requestedStartDate = parseDate(requestedStartRaw);
 
     if (!bySubdivision.has(subdivisionName)) {
