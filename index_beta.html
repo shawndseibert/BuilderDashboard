@@ -1,0 +1,3451 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Builder Schedule Dashboard</title>
+  <style>
+:root {
+  --bg: #0f1419;
+  --panel: #1a1f26;
+  --panel-alt: #242b35;
+  --border: #2d3748;
+  --text: #e5e7eb;
+  --text-dim: #9ca3af;
+  --text-soft: #6b7280;
+  --blue: #60a5fa;
+  --blue-strong: #3b82f6;
+  --blue-strong-hover: #2563eb;
+  --danger: #ef4444;
+  --overdue: #e11d48;
+  --risk: #f97316;
+  --watch: #f59e0b;
+  --safe: #10b981;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 20px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.4;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.ambient {
+  display: none;
+}
+
+.topbar,
+.layout {
+  width: min(1600px, 100%);
+  margin: 0 auto;
+}
+
+.topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+  padding: 4px 2px;
+}
+
+.topbar-copy {
+  flex: 1 1 auto;
+  max-width: 760px;
+}
+
+.topbar-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+}
+
+.setup-shell {
+  width: auto;
+}
+
+.topbar-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0;
+}
+
+.history-btn {
+  width: auto;
+  min-width: 42px;
+  margin: 0;
+  background: #1f2937;
+  color: var(--text-dim);
+  border: 1px solid #374151;
+  padding: 8px 10px;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.history-btn:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.history-btn:disabled {
+  opacity: 0.45;
+}
+
+.topbar-tab {
+  width: auto;
+  margin: 0;
+  background: #1f2937;
+  color: var(--text-dim);
+  border: 1px solid #374151;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
+.topbar-tab:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.topbar-tab.active {
+  background: #1f2937;
+  color: var(--text-dim);
+  border-color: #374151;
+}
+
+.settings-panel {
+  width: min(1320px, 100%);
+  margin: 0 auto 16px;
+  padding: 12px;
+}
+
+.settings-panel[hidden] {
+  display: none;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 6px 0;
+  color: var(--blue);
+  font-size: clamp(1.45rem, 2.1vw, 2.05rem);
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-dim);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.setup-panel {
+  padding: 12px;
+}
+
+.setup-content {
+  padding: 8px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: flex;
+  justify-content: center;
+}
+
+.setup-section {
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.setup-section.rules-section {
+  max-width: 1080px;
+}
+
+.setup-section .file-input,
+.setup-section .hint,
+.setup-section .legend,
+.setup-section .rules {
+  text-align: left;
+}
+
+.setup-section .file-input,
+.setup-section .rules,
+.setup-section .rules-actions,
+.setup-section .rules-legend {
+  width: 100%;
+}
+
+.rules-legend {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.rules-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  justify-content: center;
+}
+
+.rules-actions .secondary {
+  width: auto;
+  margin-bottom: 0;
+}
+
+.transfer-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.transfer-actions .secondary {
+  width: auto;
+  margin-bottom: 0;
+}
+
+.transfer-mode {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 0.86rem;
+}
+
+.transfer-mode select {
+  width: auto;
+  min-width: 160px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-alt);
+  color: var(--text);
+}
+
+.transfer-status {
+  margin: 8px 0 0;
+  min-height: 1.2em;
+  font-size: 0.84rem;
+  color: var(--text-dim);
+}
+
+.transfer-status.success {
+  color: #86efac;
+}
+
+.transfer-status.error {
+  color: #fca5a5;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+}
+
+.setup-section h2,
+.setup-section h3 {
+  color: var(--blue);
+  margin: 10px 0 12px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.file-input {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: var(--panel-alt);
+}
+
+.file-input span {
+  display: block;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.file-picker-control {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.file-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.file-picker-btn {
+  width: auto;
+  margin: 0;
+  min-width: 144px;
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
+  border: 1px solid #1d4ed8;
+  color: #ffffff;
+}
+
+.file-picker-btn:hover {
+  background: linear-gradient(180deg, #60a5fa, #2563eb);
+}
+
+.file-name {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.file-name.has-file {
+  color: #bfdbfe;
+}
+
+.upload-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.upload-modal[hidden] {
+  display: none;
+}
+
+.upload-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 10, 16, 0.82);
+  backdrop-filter: blur(4px);
+}
+
+.upload-modal-panel {
+  position: relative;
+  width: min(620px, 100%);
+  padding: 18px;
+}
+
+.upload-modal-panel h2 {
+  margin: 8px 0 10px;
+  color: var(--blue);
+}
+
+.upload-modal-copy {
+  margin: 0 0 14px;
+  color: var(--text-dim);
+}
+
+button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+}
+
+button.secondary {
+  width: 100%;
+  background: #4b5563;
+  color: #ffffff;
+  border: 1px solid #374151;
+  margin-bottom: 10px;
+}
+
+button.secondary:hover {
+  background: #6b7280;
+}
+
+button.secondary.inline {
+  width: auto;
+  margin-bottom: 0;
+  min-width: 124px;
+  padding-inline: 14px;
+  border-color: #445267;
+  background: #556277;
+  white-space: nowrap;
+}
+
+button.secondary.inline:hover {
+  background: #65748a;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+button.danger {
+  background: #1f2937;
+  color: var(--text-dim);
+  border: 1px solid #374151;
+}
+
+button.danger:hover {
+  background: var(--border);
+  color: #f87171;
+}
+
+.hint {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin: 0 0 10px;
+}
+
+.rules {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.rule-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) minmax(260px, 1fr) 78px 96px auto;
+  gap: 8px;
+}
+
+.rule-label {
+  grid-column: 1;
+}
+
+.rule-keywords {
+  grid-column: 2;
+}
+
+.rule-weeks {
+  grid-column: 3;
+}
+
+.remove-rule {
+  grid-column: 5;
+}
+
+.rule-unit {
+  grid-column: 4;
+}
+
+.rule-row input,
+.rule-row select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.legend {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.legend > div {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.swatch.overdue {
+  background: var(--overdue);
+}
+
+.swatch.risk {
+  background: var(--risk);
+}
+
+.swatch.watch {
+  background: var(--watch);
+}
+
+.swatch.safe {
+  background: var(--safe);
+}
+
+.results {
+  padding: 16px;
+}
+
+.summary {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.builder-title {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 600;
+  color: var(--blue);
+}
+
+.summary p {
+  margin: 8px 0 0;
+  color: var(--text-dim);
+}
+
+.active-filter {
+  color: #93c5fd;
+}
+
+.command-bar {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) auto;
+  gap: 10px;
+  margin-bottom: 12px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(36, 43, 53, 0.9), rgba(26, 31, 38, 0.9));
+}
+
+.command-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.command-bar input,
+.command-bar select {
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.command-bar input:focus,
+.command-bar select:focus,
+.rule-row input:focus,
+.rule-row select:focus {
+  outline: none;
+  border-color: var(--blue-strong);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.results.no-data .command-actions {
+  display: none;
+}
+
+.results.no-data .command-bar {
+  grid-template-columns: 1fr;
+}
+
+.results.no-data .command-bar input {
+  opacity: 0.8;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.metric-card {
+  width: 100%;
+  margin: 0;
+  text-align: left;
+  color: var(--text);
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.metric-card:hover {
+  border-color: #43556e;
+}
+
+.metric-card.active {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+}
+
+.metric-card p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metric-card h3 {
+  margin: 6px 0 0;
+  font-size: 1.45rem;
+  font-weight: 600;
+}
+
+.metric-overdue {
+  border-left: 4px solid var(--overdue);
+}
+
+.metric-risk {
+  border-left: 4px solid var(--risk);
+}
+
+.metric-watch {
+  border-left: 4px solid var(--watch);
+}
+
+.metric-safe {
+  border-left: 4px solid var(--safe);
+}
+
+.metric-takeoff {
+  border-left: 4px solid #f97316;
+}
+
+.metric-takeoff.active {
+  border-color: #fdba74;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.28);
+}
+
+.subdivision {
+  margin: 8px 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--panel-alt);
+}
+
+.subdivision > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #161b22;
+  border-bottom: 1px solid var(--border);
+}
+
+.subdivision > summary::-webkit-details-marker {
+  display: none;
+}
+
+.subdivision > summary::before {
+  content: "▸";
+  color: var(--text-dim);
+  margin-right: 8px;
+}
+
+.subdivision[open] > summary::before {
+  content: "▾";
+}
+
+.subdivision-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subdivision-title-wrap h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.subdivision-title-wrap p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+}
+
+.subdivision-badges,
+.lot-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.lots-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 10px;
+}
+
+.lot-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0;
+  transition: border-color 0.2s, transform 0.2s;
+  overflow: hidden;
+}
+
+.lot-card:hover {
+  border-color: #3b4a5f;
+  transform: translateY(-1px);
+}
+
+.lot-card > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.lot-card > summary::-webkit-details-marker {
+  display: none;
+}
+
+.lot-card > summary::before {
+  content: "▸";
+  color: var(--text-dim);
+  margin-right: 8px;
+}
+
+.lot-card[open] > summary::before {
+  content: "▾";
+}
+
+.lot-card-body {
+  padding: 0 10px 10px;
+}
+
+.lot-overdue {
+  box-shadow: inset 4px 0 0 var(--overdue);
+}
+
+.lot-risk {
+  box-shadow: inset 4px 0 0 var(--risk);
+}
+
+.lot-watch {
+  box-shadow: inset 4px 0 0 var(--watch);
+}
+
+.lot-safe {
+  box-shadow: inset 4px 0 0 var(--safe);
+}
+
+.lot-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.lot-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lot-complete-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+.lot-complete-control input {
+  margin: 0;
+  accent-color: #94a3b8;
+}
+
+.lot-card.lot-complete {
+  opacity: 0.62;
+  box-shadow: inset 4px 0 0 #64748b;
+}
+
+.lot-card.lot-complete:hover {
+  transform: none;
+  border-color: var(--border);
+}
+
+.status-complete {
+  background: rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+}
+
+.lot-name {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+
+.lot-meta {
+  margin: 0 0 8px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.badge {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+.status-overdue {
+  background: rgba(225, 29, 72, 0.22);
+  color: #fda4af;
+}
+
+.status-risk {
+  background: rgba(249, 115, 22, 0.22);
+  color: #fdba74;
+}
+
+.status-watch {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fcd34d;
+}
+
+.status-safe {
+  background: rgba(16, 185, 129, 0.22);
+  color: #6ee7b7;
+}
+
+.task-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  table-layout: fixed;
+}
+
+.task-table th,
+.task-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 7px 6px;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+
+.task-table th {
+  color: var(--text-dim);
+  font-weight: 500;
+  font-size: 0.77rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.task-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.task-table th:nth-child(1),
+.task-table td:nth-child(1) {
+  width: 35%;
+}
+
+.task-table th:nth-child(2),
+.task-table td:nth-child(2) {
+  width: 17%;
+}
+
+.task-table th:nth-child(3),
+.task-table td:nth-child(3) {
+  width: 15%;
+}
+
+.task-status {
+  width: 15%;
+}
+
+.task-takeoff {
+  width: 18%;
+}
+
+.takeoff-select {
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-alt);
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.takeoff-select option {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+.takeoff-select:focus {
+  outline: none;
+  border-color: var(--blue-strong);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.takeoff-select.takeoff-need-takeoff {
+  background: rgba(249, 115, 22, 0.15);
+  color: #fdba74;
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+.takeoff-select.takeoff-ordered {
+  background: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+.takeoff-select.takeoff-received {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.task-schedule-select {
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-alt);
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.task-schedule-select option {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+.task-schedule-select:focus {
+  outline: none;
+  border-color: var(--blue-strong);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.task-schedule-select.schedule-needs-scheduling {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fef3c7;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.task-schedule-select.schedule-scheduled {
+  background: rgba(16, 185, 129, 0.22);
+  color: #d1fae5;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.takeoff-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.takeoff-eta-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.takeoff-order-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.takeoff-label {
+  min-width: 36px;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.takeoff-eta {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 3px 5px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-alt);
+  color: var(--text);
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+
+.takeoff-order-date {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 3px 5px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-alt);
+  color: var(--text);
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+
+.takeoff-eta:focus {
+  outline: none;
+  border-color: var(--blue-strong);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.takeoff-order-date:focus {
+  outline: none;
+  border-color: var(--blue-strong);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.takeoff-eta-hint {
+  color: var(--text-dim);
+  font-size: 0.7rem;
+}
+
+.supply-badge-good {
+  background: rgba(16, 185, 129, 0.22);
+  color: #6ee7b7;
+  white-space: nowrap;
+}
+
+.supply-badge-late {
+  background: rgba(225, 29, 72, 0.22);
+  color: #fda4af;
+  white-space: nowrap;
+}
+
+.supply-badge-ready {
+  background: rgba(16, 185, 129, 0.22);
+  color: #6ee7b7;
+}
+
+.supply-badge-ready {
+  background: rgba(16, 185, 129, 0.22);
+  color: #6ee7b7;
+}
+
+.metric-supply {
+  border-left: 4px solid #f59e0b;
+}
+
+.metric-supply.active {
+  border-color: #fcd34d;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+}
+
+.lot-supply-gap {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.18);
+  color: #fcd34d;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+
+.need-takeoff-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px 3px 8px;
+  border-radius: 999px;
+  background: rgba(249, 115, 22, 0.2);
+  color: #fdba74;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.need-takeoff-count {
+  min-width: 20px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(249, 115, 22, 0.38);
+  color: #fff7ed;
+  text-align: center;
+}
+
+.supply-gap-btn {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.supply-gap-btn:hover {
+  background: rgba(245, 158, 11, 0.22);
+}
+
+.supply-gap-btn.active {
+  background: rgba(245, 158, 11, 0.28);
+  border-color: #fcd34d;
+  color: #fff;
+}
+
+.task-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-name-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.task-complete-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.task-complete-control input {
+  margin: 0;
+  accent-color: #94a3b8;
+}
+
+.task-name-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.task-name-button:hover {
+  color: var(--blue);
+}
+
+.task-name-button.task-name-overdue {
+  color: #fda4af;
+}
+
+.task-name-button.task-name-risk {
+  color: #fdba74;
+}
+
+.task-name-button.task-name-watch {
+  color: #fcd34d;
+}
+
+.task-name-button.task-name-safe {
+  color: #6ee7b7;
+}
+
+.task-name-button.task-name-overdue:hover,
+.task-name-button.task-name-risk:hover,
+.task-name-button.task-name-watch:hover,
+.task-name-button.task-name-safe:hover {
+  color: #ffffff;
+}
+
+.task-detail {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.task-row-complete {
+  opacity: 0.6;
+}
+
+.task-row-complete .task-name-button,
+.task-row-complete .task-detail {
+  text-decoration: line-through;
+}
+
+.task-detail[hidden] {
+  display: none;
+}
+
+.task-table td::before {
+  content: none;
+}
+
+.empty {
+  text-align: center;
+  color: var(--text-soft);
+  padding: 30px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--panel-alt);
+}
+
+@media (max-width: 1200px) {
+  .setup-section {
+    max-width: none;
+  }
+
+  .rule-row {
+    grid-template-columns: minmax(160px, 1fr) 78px 96px auto;
+  }
+
+  .rule-keywords {
+    grid-column: 1 / -1;
+  }
+
+  .command-actions {
+    justify-content: flex-start;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  body {
+    padding: 12px;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .topbar {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .topbar-actions {
+    width: auto;
+    justify-content: flex-end;
+  }
+
+  .settings-header {
+    align-items: flex-end;
+  }
+
+  .settings-panel {
+    width: 100%;
+    max-width: none;
+  }
+
+  .topbar-tabs {
+    gap: 6px;
+  }
+
+  .topbar-tab {
+    padding: 8px 10px;
+  }
+
+  .history-btn {
+    padding: 8px;
+    min-width: 38px;
+  }
+
+  .rule-row {
+    grid-template-columns: 1fr;
+  }
+
+  .rule-label,
+  .rule-keywords,
+  .rule-weeks,
+  .rule-unit,
+  .remove-rule {
+    grid-column: auto;
+  }
+
+  .command-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .command-actions {
+    justify-content: flex-start;
+    display: flex;
+  }
+
+  .command-actions .secondary.inline {
+    width: auto;
+  }
+
+  .rules-actions {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .rules-actions .secondary {
+    width: 100%;
+  }
+
+  .lots-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 10px;
+  }
+
+  .topbar {
+    margin-bottom: 10px;
+    padding-inline: 0;
+  }
+
+  .topbar-actions {
+    width: auto;
+    justify-content: flex-end;
+  }
+
+  .topbar-tabs {
+    justify-content: flex-end;
+  }
+
+  .topbar-tab {
+    width: auto;
+    min-width: 0;
+    padding-inline: 9px;
+    font-size: 0.82rem;
+  }
+
+  .history-btn {
+    min-width: 36px;
+    padding: 8px 6px;
+    font-size: 0.92rem;
+  }
+
+  .settings-panel {
+    width: 100%;
+  }
+
+  .command-bar {
+    padding: 8px;
+  }
+
+  .command-actions {
+    justify-content: stretch;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .command-actions .secondary.inline {
+    min-width: 0;
+    width: 100%;
+    padding-inline: 10px;
+  }
+
+  .setup-section.rules-section {
+    text-align: left;
+  }
+
+  .setup-section.rules-section h2,
+  .setup-section.rules-section .rules-actions,
+  .setup-section.rules-section .rules-legend h3 {
+    text-align: center;
+  }
+
+  .file-picker-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .file-picker-btn {
+    width: 100%;
+  }
+
+  .upload-modal-panel {
+    padding: 14px;
+  }
+
+  h1 {
+    font-size: 1.35rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .setup-panel,
+  .results {
+    padding: 10px;
+  }
+
+  .setup-content {
+    padding: 12px 4px 4px;
+  }
+
+  .summary {
+    padding: 12px;
+  }
+
+  .builder-title {
+    font-size: 1.28rem;
+  }
+
+  .subdivision > summary {
+    padding: 10px;
+    align-items: flex-start;
+  }
+
+  .subdivision-title-wrap h3 {
+    font-size: 1rem;
+  }
+
+  .subdivision-title-wrap p,
+  .lot-meta {
+    font-size: 0.8rem;
+  }
+
+  .lot-card > summary,
+  .lot-card-body {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .lot-head {
+    align-items: flex-start;
+  }
+
+  .lot-name {
+    font-size: 0.98rem;
+  }
+
+  .task-table {
+    table-layout: auto;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    font-size: 0.9rem;
+  }
+
+  .task-table thead {
+    display: none;
+  }
+
+  .task-table tbody {
+    display: block;
+  }
+
+  .task-table tbody tr {
+    display: block;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px;
+  }
+
+  .task-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .task-table td {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 8px;
+    width: 100%;
+    padding: 4px 0;
+    border-bottom: none;
+    overflow-wrap: anywhere;
+    align-items: start;
+  }
+
+  .task-table td::before {
+    content: attr(data-label);
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .task-table td:nth-child(1),
+  .task-table td:nth-child(2),
+  .task-table td:nth-child(3),
+  .task-status,
+  .task-takeoff {
+    width: 100%;
+  }
+
+  .task-status .badge {
+    justify-self: start;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="ambient"></div>
+  <div id="uploadModal" class="upload-modal" role="dialog" aria-modal="true" aria-labelledby="uploadModalTitle">
+    <div class="upload-modal-backdrop"></div>
+    <div class="upload-modal-panel panel">
+      <p class="eyebrow">Builder Operations</p>
+      <h2 id="uploadModalTitle">Schedule Lead-Time Dashboard</h2>
+      <p class="upload-modal-copy">Upload a spreadsheet and instantly view Builder &gt; Subdivision &gt; Lot &gt; Task with risk colors.</p>
+      <label class="file-input" for="fileInputModal">
+        <span>Excel spreadsheet (.xlsx or .xls)</span>
+        <input id="fileInputModal" class="file-picker-control" type="file" accept=".xlsx,.xls" />
+        <div class="file-picker-row">
+          <button id="chooseFileModalBtn" class="file-picker-btn" type="button">Choose Spreadsheet</button>
+          <span id="selectedFileModal" class="file-name">No file selected</span>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="topbar-copy">
+      <p class="eyebrow">Builder Operations</p>
+    </div>
+    <div class="topbar-actions">
+      <div id="setupShell" class="setup-shell" hidden>
+        <div class="topbar-tabs" role="tablist" aria-label="Dashboard setup tabs">
+          <button id="undoBtn" class="history-btn" type="button" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>&#8634;</button>
+          <button id="redoBtn" class="history-btn" type="button" title="Redo (Ctrl+Shift+Z)" aria-label="Redo" disabled>&#8635;</button>
+          <button class="topbar-tab active" data-tab-target="tab-data" type="button">Data Source</button>
+          <button class="topbar-tab" data-tab-target="tab-rules" type="button">Lead-Time Rules</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="settingsPanel" class="panel setup-panel settings-panel" hidden>
+    <div class="setup-content">
+      <div id="tab-data" class="tab-panel active">
+        <div class="setup-section">
+          <h2>Data Source</h2>
+          <label class="file-input" for="fileInputSettings">
+            <span>Upload a new Excel sheet (.xlsx or .xls)</span>
+            <input id="fileInputSettings" class="file-picker-control" type="file" accept=".xlsx,.xls" />
+            <div class="file-picker-row">
+              <button id="chooseFileSettingsBtn" class="file-picker-btn" type="button">Replace Spreadsheet</button>
+              <span id="selectedFileSettings" class="file-name">No file selected</span>
+            </div>
+          </label>
+          <input id="completedListImportInput" class="file-picker-control" type="file" accept="application/json,.json" />
+          <div class="transfer-actions">
+            <button id="exportCompletedBtn" class="secondary" type="button">Export Completed List</button>
+            <button id="importCompletedBtn" class="secondary" type="button">Import Completed List</button>
+          </div>
+          <label class="transfer-mode" for="completedImportMode">
+            <span>Import Mode</span>
+            <select id="completedImportMode">
+              <option value="replace">Replace current completed list</option>
+              <option value="merge">Merge with current completed list</option>
+            </select>
+          </label>
+          <p id="transferStatus" class="transfer-status" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div id="tab-rules" class="tab-panel">
+        <div class="setup-section rules-section">
+          <h2>Lead-Time Rules</h2>
+          <p class="hint">Tasks are matched by keyword. If a task start date is inside the lead-time window, it is marked at risk.</p>
+          <div id="rulesContainer" class="rules"></div>
+          <div class="rules-actions">
+            <button id="addRuleBtn" class="secondary" type="button">Add Rule</button>
+            <button id="resetRulesBtn" class="secondary" type="button">Reset Defaults</button>
+          </div>
+          <div class="rules-legend legend">
+            <h3>Color Legend</h3>
+            <div><span class="swatch overdue"></span> Late / Started too soon</div>
+            <div><span class="swatch risk"></span> At risk (inside lead-time window)</div>
+            <div><span class="swatch watch"></span> Watch list (within 14 days after lead time)</div>
+            <div><span class="swatch safe"></span> Safe</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="layout">
+    <section class="panel results" hidden>
+      <div id="summary" class="summary"></div>
+      <div class="command-bar">
+        <input id="lotSearch" type="search" placeholder="Search subdivision, lot, or task" />
+        <div class="command-actions">
+          <button id="clearFiltersBtn" class="secondary inline" type="button">Clear Filters</button>
+          <button id="supplyGapBtn" class="secondary inline supply-gap-btn" type="button">Supply Gaps</button>
+          <button id="expandAllBtn" class="secondary inline">Expand All</button>
+          <button id="collapseAllBtn" class="secondary inline">Collapse All</button>
+        </div>
+      </div>
+      <div id="metrics" class="metrics"></div>
+      <div id="dashboard" class="dashboard"></div>
+    </section>
+  </main>
+
+  <template id="ruleTemplate">
+    <div class="rule-row">
+      <input type="text" class="rule-label" placeholder="Rule label (e.g. Windows & Doors)" />
+      <input type="text" class="rule-keywords" placeholder="Keywords (comma separated)" />
+      <input type="number" class="rule-weeks" min="1" max="365" value="21" />
+      <select class="rule-unit" aria-label="Lead-time unit">
+        <option value="days">Days</option>
+        <option value="weeks">Weeks</option>
+      </select>
+      <button class="danger remove-rule" type="button">Remove</button>
+    </div>
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+const REQUIRED_COLUMNS = [
+  "Builder Name",
+  "Subdivision",
+  "Lot / Block",
+  "Task",
+  "Requested Start Date",
+  "Status"
+];
+
+const fileInputModal = document.getElementById("fileInputModal");
+const fileInputSettings = document.getElementById("fileInputSettings");
+const chooseFileModalBtn = document.getElementById("chooseFileModalBtn");
+const chooseFileSettingsBtn = document.getElementById("chooseFileSettingsBtn");
+const selectedFileModal = document.getElementById("selectedFileModal");
+const selectedFileSettings = document.getElementById("selectedFileSettings");
+const exportCompletedBtn = document.getElementById("exportCompletedBtn");
+const importCompletedBtn = document.getElementById("importCompletedBtn");
+const completedListImportInput = document.getElementById("completedListImportInput");
+const completedImportMode = document.getElementById("completedImportMode");
+const transferStatus = document.getElementById("transferStatus");
+const uploadModal = document.getElementById("uploadModal");
+const rulesContainer = document.getElementById("rulesContainer");
+const addRuleBtn = document.getElementById("addRuleBtn");
+const resetRulesBtn = document.getElementById("resetRulesBtn");
+const settingsPanel = document.getElementById("settingsPanel");
+const setupShell = document.getElementById("setupShell");
+const undoBtn = document.getElementById("undoBtn");
+const redoBtn = document.getElementById("redoBtn");
+const dashboard = document.getElementById("dashboard");
+const summary = document.getElementById("summary");
+const metrics = document.getElementById("metrics");
+const resultsPanel = document.querySelector(".results");
+const ruleTemplate = document.getElementById("ruleTemplate");
+const lotSearch = document.getElementById("lotSearch");
+const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+const supplyGapBtn = document.getElementById("supplyGapBtn");
+const expandAllBtn = document.getElementById("expandAllBtn");
+const collapseAllBtn = document.getElementById("collapseAllBtn");
+const topbarTabs = [...document.querySelectorAll(".topbar-tab")];
+const RULES_STORAGE_KEY = "builder_dashboard_rules";
+const LOT_COMPLETION_STORAGE_KEY = "builder_dashboard_completed_lots";
+const LOT_TAKEOFF_STATUS_STORAGE_KEY = "builder_dashboard_takeoff_status";
+const LOT_TAKEOFF_ETA_STORAGE_KEY = "builder_dashboard_takeoff_eta";
+const LOT_TAKEOFF_ORDER_DATE_STORAGE_KEY = "builder_dashboard_takeoff_order_date";
+const LOT_TASK_SCHEDULING_STATUS_STORAGE_KEY = "builder_dashboard_task_scheduling_status";
+const LOT_TASK_COMPLETION_STORAGE_KEY = "builder_dashboard_task_completion_status";
+const LEGACY_WORKBOOK_STORAGE_KEYS = [
+  "builder_dashboard_workbook_base64",
+  "builder_dashboard_workbook_name"
+];
+
+let rows = [];
+let currentSourceName = "Uploaded file";
+let activeStatusFilter = "all";
+let supplyGapFilter = false;
+let needTakeoffFilter = false;
+let completedLotKeys = restoreCompletedLots();
+let taskTakeoffStatus = restoreTakeoffStatus();
+let taskTakeoffEta = restoreTakeoffEta();
+let taskTakeoffOrderDate = restoreTakeoffOrderDate();
+let taskSchedulingStatus = restoreTaskSchedulingStatus();
+let taskCompletionStatus = restoreTaskCompletionStatus();
+let completionUndoStack = [];
+let completionRedoStack = [];
+
+const defaultRules = [
+  {
+    label: "Screens",
+    keywords: "screen, screens",
+    amount: 1,
+    unit: "days"
+  },
+  {
+    label: "Punch / Warranty",
+    keywords: "punch, punchout, warranty, repair, replace, threshold",
+    amount: 2,
+    unit: "days"
+  },
+  {
+    label: "Windows",
+    keywords: "window, windows, glass",
+    amount: 21,
+    unit: "days"
+  },
+  {
+    label: "Exterior Doors",
+    keywords: "exterior door, exterior doors, sliding glass door, back door, front door",
+    amount: 14,
+    unit: "days"
+  },
+  {
+    label: "Stairs",
+    keywords: "stairs, stair",
+    amount: 21,
+    unit: "days"
+  },
+  {
+    label: "Roof / Truss / Sheathing",
+    keywords: "roof, truss, trusses, sheathing, bracing",
+    amount: 14,
+    unit: "days"
+  },
+  {
+    label: "Framing / Lumber / Floor System",
+    keywords: "framing, frame, lumber, joist, joists, floor system, i-joist, panels, wall package",
+    amount: 10,
+    unit: "days"
+  },
+  {
+    label: "Weather Barrier",
+    keywords: "house wrap, housewrap, tyvek, weather barrier",
+    amount: 7,
+    unit: "days"
+  },
+  {
+    label: "Interior Trim / Millwork",
+    keywords: "interior trim, trim, molding, mill, carpentry, shoe",
+    amount: 5,
+    unit: "days"
+  },
+  {
+    label: "Hardware / Final",
+    keywords: "hardware, final",
+    amount: 5,
+    unit: "days"
+  },
+  {
+    label: "Material / Delivery",
+    keywords: "deliver, delivery, material, package, drop",
+    amount: 7,
+    unit: "days"
+  },
+  {
+    label: "General",
+    keywords: "",
+    amount: 2,
+    unit: "weeks"
+  }
+];
+
+initializeRulesUI();
+clearLegacyWorkbookStorage();
+
+chooseFileModalBtn.addEventListener("click", () => {
+  fileInputModal.click();
+});
+
+chooseFileSettingsBtn.addEventListener("click", () => {
+  fileInputSettings.click();
+});
+
+exportCompletedBtn.addEventListener("click", () => {
+  exportCompletedLots();
+});
+
+importCompletedBtn.addEventListener("click", () => {
+  completedListImportInput.click();
+});
+
+completedListImportInput.addEventListener("change", async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) {
+    return;
+  }
+
+  try {
+    await importCompletedLots(file, completedImportMode.value);
+  } finally {
+    completedListImportInput.value = "";
+  }
+});
+
+fileInputModal.addEventListener("change", async (event) => {
+  const file = event.target.files?.[0];
+  updateSelectedFileName(file?.name || "");
+  await handleWorkbookFile(file);
+});
+
+fileInputSettings.addEventListener("change", async (event) => {
+  const file = event.target.files?.[0];
+  updateSelectedFileName(file?.name || "");
+  await handleWorkbookFile(file);
+});
+
+addRuleBtn.addEventListener("click", () => {
+  appendRuleRow({ label: "", keywords: "", amount: 2, unit: "weeks" });
+  persistRules();
+});
+
+resetRulesBtn.addEventListener("click", () => {
+  resetRulesToDefaults();
+  if (rows.length > 0) {
+    renderDashboard(rows, currentSourceName);
+  }
+});
+
+rulesContainer.addEventListener("input", () => {
+  persistRules();
+  if (rows.length > 0) {
+    renderDashboard(rows, currentSourceName);
+  }
+});
+
+rulesContainer.addEventListener("click", (event) => {
+  if (!event.target.classList.contains("remove-rule")) {
+    return;
+  }
+
+  const row = event.target.closest(".rule-row");
+  if (row) {
+    row.remove();
+  }
+
+  persistRules();
+
+  if (rows.length > 0) {
+    renderDashboard(rows, currentSourceName);
+  }
+});
+
+lotSearch.addEventListener("input", () => {
+  if (rows.length > 0) {
+    renderDashboard(rows, currentSourceName);
+  }
+});
+
+clearFiltersBtn.addEventListener("click", () => {
+  activeStatusFilter = "all";
+  supplyGapFilter = false;
+  needTakeoffFilter = false;
+  supplyGapBtn.classList.remove("active");
+  lotSearch.value = "";
+  if (rows.length > 0) {
+    renderDashboard(rows, currentSourceName);
+  }
+});
+
+supplyGapBtn.addEventListener("click", () => {
+  supplyGapFilter = !supplyGapFilter;
+  supplyGapBtn.classList.toggle("active", supplyGapFilter);
+  if (rows.length > 0) {
+    renderDashboard(rows, currentSourceName);
+  }
+});
+
+undoBtn.addEventListener("click", () => {
+  undoCompletionChange();
+});
+
+redoBtn.addEventListener("click", () => {
+  redoCompletionChange();
+});
+
+metrics.addEventListener("click", (event) => {
+  const button = event.target.closest("button.metric-card[data-status]");
+  if (button) {
+    const selected = button.dataset.status;
+    activeStatusFilter = activeStatusFilter === selected ? "all" : selected;
+    if (rows.length > 0) {
+      renderDashboard(rows, currentSourceName);
+    }
+    return;
+  }
+
+  const takeoffBtn = event.target.closest("#needTakeoffMetricBtn");
+  if (takeoffBtn) {
+    needTakeoffFilter = !needTakeoffFilter;
+    if (rows.length > 0) {
+      renderDashboard(rows, currentSourceName);
+    }
+    return;
+  }
+
+  const supplyBtn = event.target.closest("#supplyGapMetricBtn");
+  if (supplyBtn) {
+    supplyGapFilter = !supplyGapFilter;
+    supplyGapBtn.classList.toggle("active", supplyGapFilter);
+    if (rows.length > 0) {
+      renderDashboard(rows, currentSourceName);
+    }
+  }
+});
+
+dashboard.addEventListener("click", (event) => {
+  if (event.target.closest(".lot-complete-control")) {
+    event.stopPropagation();
+    return;
+  }
+
+  const button = event.target.closest(".task-name-button[data-task-detail-id]");
+  if (!button) {
+    return;
+  }
+
+  const detail = document.getElementById(button.dataset.taskDetailId);
+  if (!detail) {
+    return;
+  }
+
+  const nextHidden = !detail.hidden;
+  detail.hidden = nextHidden;
+  button.setAttribute("aria-expanded", String(!nextHidden));
+});
+
+dashboard.addEventListener("change", (event) => {
+  const taskCompleteToggle = event.target.closest(".task-complete-toggle");
+  if (taskCompleteToggle) {
+    const key = taskCompleteToggle.dataset.taskKey;
+    if (!key) return;
+    if (taskCompleteToggle.checked) {
+      taskCompletionStatus.set(key, true);
+    } else {
+      taskCompletionStatus.delete(key);
+    }
+    persistTaskCompletionStatus();
+    if (rows.length > 0) renderDashboard(rows, currentSourceName);
+    return;
+  }
+
+  const schedulingSelect = event.target.closest(".task-schedule-select");
+  if (schedulingSelect) {
+    const key = schedulingSelect.dataset.scheduleKey;
+    if (!key) return;
+    const value = schedulingSelect.value;
+    if (value) {
+      taskSchedulingStatus.set(key, value);
+    } else {
+      taskSchedulingStatus.delete(key);
+    }
+    persistTaskSchedulingStatus();
+    if (rows.length > 0) renderDashboard(rows, currentSourceName);
+    return;
+  }
+
+  const takeoffSelect = event.target.closest(".takeoff-select");
+  if (takeoffSelect) {
+    const key = takeoffSelect.dataset.takeoffKey;
+    if (!key) return;
+    const value = takeoffSelect.value;
+    if (value) {
+      taskTakeoffStatus.set(key, value);
+    } else {
+      taskTakeoffStatus.delete(key);
+      taskTakeoffEta.delete(key);
+      taskTakeoffOrderDate.delete(key);
+    }
+    persistTakeoffStatus();
+    persistTakeoffEta();
+    persistTakeoffOrderDate();
+    if (rows.length > 0) renderDashboard(rows, currentSourceName);
+    return;
+  }
+
+  const takeoffOrderDateInput = event.target.closest(".takeoff-order-date");
+  if (takeoffOrderDateInput) {
+    const key = takeoffOrderDateInput.dataset.takeoffKey;
+    if (!key) return;
+    const value = takeoffOrderDateInput.value;
+    if (value) {
+      taskTakeoffOrderDate.set(key, value);
+    } else {
+      taskTakeoffOrderDate.delete(key);
+    }
+    persistTakeoffOrderDate();
+    if (rows.length > 0) renderDashboard(rows, currentSourceName);
+    return;
+  }
+
+  const takeoffEtaInput = event.target.closest(".takeoff-eta");
+  if (takeoffEtaInput) {
+    const key = takeoffEtaInput.dataset.takeoffKey;
+    if (!key) return;
+    const value = takeoffEtaInput.value;
+    if (value) {
+      taskTakeoffEta.set(key, value);
+    } else {
+      taskTakeoffEta.delete(key);
+    }
+    persistTakeoffEta();
+    if (rows.length > 0) renderDashboard(rows, currentSourceName);
+    return;
+  }
+
+  const toggle = event.target.closest(".lot-complete-toggle");
+  if (!toggle) {
+    return;
+  }
+
+  const lotKey = toggle.dataset.lotKey;
+  if (!lotKey) {
+    return;
+  }
+
+  const previousCompleted = completedLotKeys.has(lotKey);
+
+  if (toggle.checked) {
+    completedLotKeys.add(lotKey);
+  } else {
+    completedLotKeys.delete(lotKey);
+  }
+
+  const nextCompleted = completedLotKeys.has(lotKey);
+  if (nextCompleted === previousCompleted) {
+    return;
+  }
+
+  completionUndoStack.push({
+    lotKey,
+    previousCompleted,
+    nextCompleted
+  });
+  completionRedoStack = [];
+  updateCompletionHistoryControls();
+
+  persistCompletedLots();
+  if (rows.length > 0) {
+    renderDashboard(rows, currentSourceName);
+  }
+});
+
+for (const tab of topbarTabs) {
+  tab.addEventListener("click", () => {
+    if (rows.length === 0) {
+      return;
+    }
+
+    const targetId = tab.dataset.tabTarget;
+    const activeTab = topbarTabs.find((item) => item.classList.contains("active"));
+    const isSameActiveTab = activeTab && activeTab.dataset.tabTarget === targetId;
+
+    if (!settingsPanel.hidden && isSameActiveTab) {
+      settingsPanel.hidden = true;
+      return;
+    }
+
+    activateTab(targetId);
+    settingsPanel.hidden = false;
+  });
+}
+
+document.addEventListener("click", (event) => {
+  if (rows.length === 0 || settingsPanel.hidden) {
+    return;
+  }
+
+  const path = typeof event.composedPath === "function" ? event.composedPath() : [];
+  const clickedInsidePanel = path.includes(settingsPanel) || settingsPanel.contains(event.target);
+  const clickedTabButton = topbarTabs.some((tab) => path.includes(tab) || tab.contains(event.target));
+  if (clickedInsidePanel || clickedTabButton) {
+    return;
+  }
+
+  settingsPanel.hidden = true;
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !settingsPanel.hidden) {
+    settingsPanel.hidden = true;
+    return;
+  }
+
+  if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== "z") {
+    return;
+  }
+
+  if (isEditableTarget(event.target)) {
+    return;
+  }
+
+  event.preventDefault();
+  if (event.shiftKey) {
+    redoCompletionChange();
+  } else {
+    undoCompletionChange();
+  }
+});
+
+expandAllBtn.addEventListener("click", () => {
+  [...dashboard.querySelectorAll("details.subdivision, details.lot-card")].forEach((el) => {
+    el.open = true;
+  });
+});
+
+collapseAllBtn.addEventListener("click", () => {
+  [...dashboard.querySelectorAll("details.subdivision, details.lot-card")].forEach((el) => {
+    el.open = false;
+  });
+});
+
+renderEmpty("Upload your Excel sheet to generate the dashboard.");
+
+function activateTab(targetId) {
+  topbarTabs.forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.tabTarget === targetId);
+  });
+  document.querySelectorAll(".tab-panel").forEach((panel) => {
+    panel.classList.toggle("active", panel.id === targetId);
+  });
+}
+
+function setSetupState(hasData) {
+  resultsPanel.classList.toggle("no-data", !hasData);
+  setupShell.hidden = !hasData;
+  if (!hasData) {
+    settingsPanel.hidden = true;
+  }
+  resultsPanel.hidden = !hasData;
+  uploadModal.hidden = hasData;
+  document.body.classList.toggle("modal-open", !hasData);
+
+  lotSearch.disabled = !hasData;
+  clearFiltersBtn.disabled = !hasData;
+  supplyGapBtn.disabled = !hasData;
+  expandAllBtn.disabled = !hasData;
+  collapseAllBtn.disabled = !hasData;
+  undoBtn.disabled = !hasData || completionUndoStack.length === 0;
+  redoBtn.disabled = !hasData || completionRedoStack.length === 0;
+
+  if (hasData) {
+    return;
+  }
+
+  supplyGapFilter = false;
+  needTakeoffFilter = false;
+  supplyGapBtn.classList.remove("active");
+  activateTab("tab-data");
+}
+
+function updateSelectedFileName(name) {
+  const label = name || "No file selected";
+  selectedFileModal.textContent = label;
+  selectedFileSettings.textContent = label;
+  const hasName = Boolean(name);
+  selectedFileModal.classList.toggle("has-file", hasName);
+  selectedFileSettings.classList.toggle("has-file", hasName);
+}
+
+async function handleWorkbookFile(file) {
+  if (!file) {
+    return;
+  }
+
+  try {
+    const buffer = await file.arrayBuffer();
+    loadWorkbookFromArrayBuffer(buffer, file.name);
+  } catch (error) {
+    console.error("Failed to read workbook:", error);
+    renderEmpty("Could not read the selected spreadsheet.");
+  } finally {
+    fileInputModal.value = "";
+    fileInputSettings.value = "";
+  }
+}
+
+function appendRuleRow(rule) {
+  const fragment = ruleTemplate.content.cloneNode(true);
+  const row = fragment.querySelector(".rule-row");
+  const amount = Number(rule.amount);
+  const fallbackFromDays = Number(rule.days);
+  const fallbackFromWeeks = Number(rule.weeks);
+  let resolvedAmount = 0;
+  let resolvedUnit = "days";
+
+  if (Number.isFinite(amount) && amount > 0) {
+    resolvedAmount = amount;
+    resolvedUnit = rule.unit === "weeks" ? "weeks" : "days";
+  } else if (Number.isFinite(fallbackFromDays) && fallbackFromDays > 0) {
+    resolvedAmount = fallbackFromDays;
+  } else if (Number.isFinite(fallbackFromWeeks) && fallbackFromWeeks > 0) {
+    resolvedAmount = fallbackFromWeeks;
+    resolvedUnit = "weeks";
+  }
+
+  row.querySelector(".rule-label").value = rule.label;
+  row.querySelector(".rule-keywords").value = rule.keywords;
+  row.querySelector(".rule-weeks").value = resolvedAmount || 1;
+  row.querySelector(".rule-unit").value = resolvedUnit;
+  rulesContainer.appendChild(fragment);
+}
+
+function initializeRulesUI() {
+  const storedRules = restoreRules();
+  const rulesToLoad = storedRules.length > 0 ? storedRules : defaultRules;
+  rulesContainer.innerHTML = "";
+  for (const rule of rulesToLoad) {
+    appendRuleRow(rule);
+  }
+}
+
+function resetRulesToDefaults() {
+  rulesContainer.innerHTML = "";
+  for (const rule of defaultRules) {
+    appendRuleRow(rule);
+  }
+  persistRules();
+}
+
+function getRules() {
+  const ruleEls = [...rulesContainer.querySelectorAll(".rule-row")];
+  return ruleEls
+    .map((el) => {
+      const label = el.querySelector(".rule-label").value.trim() || "Custom";
+      const keywords = el
+        .querySelector(".rule-keywords")
+        .value.split(",")
+        .map((x) => x.trim().toLowerCase())
+        .filter(Boolean);
+      const amount = Number(el.querySelector(".rule-weeks").value);
+      const unit = el.querySelector(".rule-unit").value === "weeks" ? "weeks" : "days";
+      const days = convertLeadToDays(amount, unit);
+      return {
+        label,
+        keywords,
+        amount: Number.isFinite(amount) ? amount : 0,
+        unit,
+        days
+      };
+    })
+    .filter((rule) => rule.days > 0);
+}
+
+function detectColumns(firstRow) {
+  const columnMap = {};
+  const headers = Object.keys(firstRow);
+  
+  // Helper to find column by keyword matching
+  const findColumn = (keywords, fallback = null) => {
+    for (const header of headers) {
+      const lower = header.toLowerCase();
+      for (const keyword of keywords) {
+        if (lower.includes(keyword.toLowerCase())) {
+          return header;
+        }
+      }
+    }
+    return fallback;
+  };
+  
+  // Detect each required column
+  columnMap["Builder Name"] = findColumn(["builder"], "Builder");
+  columnMap["Subdivision"] = findColumn(["subdivision", "project"]);
+  columnMap["Lot / Block"] = findColumn(["lot", "block", "lot #"]);
+  columnMap["Task"] = findColumn(["task", "title"]);
+  
+  // For start date: prefer "Adjusted Start Date", then "Requested Start Date", then any date + start
+  columnMap["Adjusted Start Date"] = findColumn(["adjusted", "start", "date"]);
+  if (!columnMap["Adjusted Start Date"]) {
+    columnMap["Adjusted Start Date"] = findColumn(["scheduled", "date"]);
+  }
+  if (!columnMap["Adjusted Start Date"]) {
+    columnMap["Adjusted Start Date"] = findColumn(["start", "date"]);
+  }
+  if (!columnMap["Adjusted Start Date"]) {
+    columnMap["Adjusted Start Date"] = findColumn(["date"]);
+  }
+  
+  columnMap["Status"] = findColumn(["status"]);
+  
+  return columnMap;
+}
+
+function normalizeRow(row, columnMap) {
+  const normalized = {};
+  for (const [internalName, sourceColumn] of Object.entries(columnMap)) {
+    if (sourceColumn && sourceColumn in row) {
+      normalized[internalName] = row[sourceColumn];
+    } else {
+      normalized[internalName] = "";
+    }
+  }
+  return normalized;
+}
+
+function loadWorkbookFromArrayBuffer(buffer, sourceName) {
+  const workbook = XLSX.read(buffer, { type: "array" });
+  const sheetName = workbook.SheetNames[0];
+  const sheet = workbook.Sheets[sheetName];
+  const parsedRows = XLSX.utils.sheet_to_json(sheet, {
+    defval: "",
+    raw: false
+  });
+
+  if (!parsedRows.length) {
+    renderEmpty("No rows found in the spreadsheet.");
+    return;
+  }
+
+  // Detect columns from the first row
+  const columnMap = detectColumns(parsedRows[0]);
+  
+  // Validate that critical columns were found
+  if (!columnMap["Subdivision"]) {
+    renderEmpty(`Missing critical column: Subdivision (or "Project")`);
+    return;
+  }
+  if (!columnMap["Lot / Block"]) {
+    renderEmpty(`Missing critical column: Lot / Block (or "Lot #")`);
+    return;
+  }
+  if (!columnMap["Task"]) {
+    renderEmpty(`Missing critical column: Task (or "Title")`);
+    return;
+  }
+  if (!columnMap["Adjusted Start Date"]) {
+    renderEmpty(`Missing critical column: Start Date (Adjusted, Requested, Scheduled, or any date column)`);
+    return;
+  }
+
+  // Normalize all rows to use standard internal column names
+  const normalizedRows = parsedRows.map(row => normalizeRow(row, columnMap));
+
+  rows = normalizedRows;
+  currentSourceName = sourceName;
+  completionUndoStack = [];
+  completionRedoStack = [];
+  updateCompletionHistoryControls();
+  renderDashboard(rows, sourceName);
+}
+
+function renderDashboard(dataRows, sourceName = "Uploaded file") {
+  if (!dataRows.length) {
+    renderEmpty("No rows found in the spreadsheet.");
+    return;
+  }
+
+  setSetupState(true);
+
+  const rules = getRules();
+  const grouped = groupRows(dataRows, rules);
+  const severityCounts = countSeverityByLots(grouped.subdivisions);
+  const supplyGapLotCount = grouped.subdivisions.reduce((sum, sub) => {
+    return sum + sub.lots.filter((lot) => !lot.completed && lot.supplyGapCount > 0).length;
+  }, 0);
+  const totalNeedTakeoffCount = grouped.subdivisions.reduce((sum, sub) => {
+    return sum + sub.lots.reduce((lotSum, lot) => lotSum + lot.needTakeoffCount, 0);
+  }, 0);
+  const filterText = lotSearch.value.trim().toLowerCase();
+  const statusValue = activeStatusFilter;
+  const builderName = grouped.builderName || "Unknown Builder";
+
+  summary.innerHTML = `
+    <h2 class="builder-title">${escapeHtml(builderName)}</h2>
+  `;
+
+  metrics.innerHTML = `
+    <button type="button" class="metric-card metric-overdue ${statusValue === "overdue" ? "active" : ""}" data-status="overdue"><p>Late Lots</p><h3>${severityCounts.overdue}</h3></button>
+    <button type="button" class="metric-card metric-risk ${statusValue === "risk" ? "active" : ""}" data-status="risk"><p>At Risk Lots</p><h3>${severityCounts.risk}</h3></button>
+    <button type="button" class="metric-card metric-watch ${statusValue === "watch" ? "active" : ""}" data-status="watch"><p>Watch Lots</p><h3>${severityCounts.watch}</h3></button>
+    <button type="button" class="metric-card metric-safe ${statusValue === "safe" ? "active" : ""}" data-status="safe"><p>Safe Lots</p><h3>${severityCounts.safe}</h3></button>
+    <button type="button" class="metric-card metric-takeoff ${needTakeoffFilter ? "active" : ""}" id="needTakeoffMetricBtn"><p>Need Takeoff</p><h3>${totalNeedTakeoffCount}</h3></button>
+    <button type="button" class="metric-card metric-supply ${supplyGapFilter ? "active" : ""}" id="supplyGapMetricBtn"><p>Supply Gaps</p><h3>${supplyGapLotCount}</h3></button>
+  `;
+
+  const openSubdivisionKeys = new Set(
+    [...dashboard.querySelectorAll("details.subdivision[open]")]
+      .map((el) => el.dataset.subdivisionKey)
+      .filter(Boolean)
+  );
+  const openLotKeys = new Set(
+    [...dashboard.querySelectorAll("details.lot-card[open]")]
+      .map((el) => el.dataset.lotKey)
+      .filter(Boolean)
+  );
+
+  dashboard.innerHTML = "";
+
+  let renderedSubdivisionCount = 0;
+  let renderedLotCount = 0;
+
+  for (const subdivision of grouped.subdivisions) {
+    const visibleLots = subdivision.lots.filter((lot) => {
+      if (lot.completed && statusValue !== "all") {
+        return false;
+      }
+
+      const matchesStatus = statusValue === "all" || lot.lotSeverity.css === statusValue;
+      if (!matchesStatus) {
+        return false;
+      }
+
+      if (supplyGapFilter && lot.supplyGapCount === 0) {
+        return false;
+      }
+
+      if (needTakeoffFilter && lot.needTakeoffCount === 0) {
+        return false;
+      }
+
+      if (!filterText) {
+        return true;
+      }
+
+      const lotNameMatch = lot.name.toLowerCase().includes(filterText);
+      const lotDisplayMatch = lot.displayName.toLowerCase().includes(filterText);
+      const subdivisionMatch = subdivision.name.toLowerCase().includes(filterText);
+      const taskMatch = lot.tasks.some((task) => task.taskName.toLowerCase().includes(filterText));
+      return lotNameMatch || lotDisplayMatch || subdivisionMatch || taskMatch;
+    })
+    .sort((a, b) => {
+      if (a.completed !== b.completed) {
+        return Number(a.completed) - Number(b.completed);
+      }
+      return a.name.localeCompare(b.name, undefined, { numeric: true });
+    });
+
+    if (visibleLots.length === 0) {
+      continue;
+    }
+
+    renderedSubdivisionCount += 1;
+    renderedLotCount += visibleLots.length;
+
+    const subdivisionNeedTakeoffCount = visibleLots.reduce((sum, lot) => sum + lot.needTakeoffCount, 0);
+
+    const details = document.createElement("details");
+    details.className = "subdivision";
+    const subdivisionKey = getSubdivisionKey(builderName, subdivision.name);
+    details.dataset.subdivisionKey = subdivisionKey;
+    details.open = openSubdivisionKeys.has(subdivisionKey);
+
+    const activeLots = visibleLots.filter((lot) => !lot.completed);
+    const subdivisionSeverity = activeLots.reduce((maxSeverity, lot) => {
+      return lot.lotSeverity.rank > maxSeverity.rank ? lot.lotSeverity : maxSeverity;
+    }, severityDefinitions.safe);
+    const subdivisionIsComplete = activeLots.length === 0 && visibleLots.length > 0;
+    const subdivisionBadgeClass = subdivisionIsComplete ? "status-complete" : `status-${subdivisionSeverity.css}`;
+    const subdivisionBadgeLabel = subdivisionIsComplete ? "Complete" : subdivisionSeverity.label;
+    details.innerHTML = `
+      <summary>
+        <div class="subdivision-title-wrap">
+          <h3>${escapeHtml(subdivision.name)}</h3>
+          <p>${visibleLots.length} lots</p>
+        </div>
+        <div class="subdivision-badges">
+          ${subdivisionNeedTakeoffCount > 0 ? `<span class="need-takeoff-badge">Need Takeoff <span class="need-takeoff-count">${subdivisionNeedTakeoffCount}</span></span>` : ""}
+          <span class="badge ${subdivisionBadgeClass}">${subdivisionBadgeLabel}</span>
+        </div>
+      </summary>
+      <div class="lots-grid"></div>
+    `;
+
+    const grid = details.querySelector(".lots-grid");
+
+    for (const lot of visibleLots) {
+      const lotCard = document.createElement("details");
+      lotCard.className = `lot-card lot-${lot.lotSeverity.css}${lot.completed ? " lot-complete" : ""}`;
+      lotCard.dataset.lotKey = lot.key;
+      lotCard.open = openLotKeys.has(lot.key);
+      lotCard.innerHTML = `
+        <summary>
+          <div class="lot-head">
+            <h3 class="lot-name">Lot ${escapeHtml(lot.displayName)}</h3>
+            <div class="lot-head-actions">
+              <div class="lot-badges">
+                ${lot.needTakeoffCount > 0 && !lot.completed ? `<span class="need-takeoff-badge">Need Takeoff <span class="need-takeoff-count">${lot.needTakeoffCount}</span></span>` : ""}
+                ${lot.supplyGapCount > 0 && !lot.completed ? `<span class="lot-supply-gap">⚠ ${lot.supplyGapCount} gap${lot.supplyGapCount > 1 ? "s" : ""}</span>` : ""}
+              </div>
+              <label class="lot-complete-control">
+                <input
+                  type="checkbox"
+                  class="lot-complete-toggle"
+                  data-lot-key="${escapeHtml(lot.key)}"
+                  ${lot.completed ? "checked" : ""}
+                />
+                <span>Complete</span>
+              </label>
+              <span class="badge ${lot.completed ? "status-complete" : `status-${lot.lotSeverity.css}`}">${lot.completed ? "Complete" : lot.lotSeverity.label}</span>
+            </div>
+          </div>
+          <p class="lot-meta">Earliest start: ${escapeHtml(lot.earliestStartDisplay)} · ${escapeHtml(lot.earliestTaskName)}</p>
+        </summary>
+        <div class="lot-card-body">
+          <table class="task-table">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Requested Start</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Takeoff</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${lot.tasks
+                .map(
+                  (task, index) => {
+                    const takeoffKey = task.key;
+                    const takeoffValue = taskTakeoffStatus.get(takeoffKey) || "";
+                    const takeoffOrderDateValue = taskTakeoffOrderDate.get(takeoffKey) || "";
+                    const takeoffEtaValue = taskTakeoffEta.get(takeoffKey) || "";
+                    const scheduleValue = taskSchedulingStatus.get(takeoffKey) || "";
+                    const taskCompleteChecked = task.completed ? "checked" : "";
+                    const rowClass = task.completed ? "task-row-complete" : "";
+                    const scheduleClass = scheduleValue ? `schedule-${scheduleValue}` : "";
+                    const resolvedEta = resolveTaskEta(takeoffValue, takeoffEtaValue, takeoffOrderDateValue, task.leadDays);
+                    const takeoffClass = takeoffValue ? `takeoff-${takeoffValue}` : "";
+                    const supplyStatus = computeSupplyStatus(takeoffValue, resolvedEta, task.requestedStartDate);
+
+                    let etaHtml = "";
+                    if (takeoffValue === "ordered") {
+                      const badgeHtml = supplyStatus
+                        ? `<span class="badge ${supplyStatus.badgeClass}">${supplyStatus.label}</span>`
+                        : "";
+                      const etaHint = resolvedEta
+                        ? `<span class="takeoff-eta-hint">${takeoffEtaValue ? "Vendor ETA" : "Auto ETA"}: ${escapeHtml(resolvedEta)}</span>`
+                        : `<span class="takeoff-eta-hint">Set Order Date to auto-calculate ETA.</span>`;
+                      etaHtml = `
+                      <div class="takeoff-order-row">
+                        <span class="takeoff-label">Order</span>
+                        <input type="date" class="takeoff-order-date" data-takeoff-key="${escapeHtml(takeoffKey)}" value="${escapeHtml(takeoffOrderDateValue)}" title="Date the order was placed" />
+                      </div>
+                      <div class="takeoff-eta-row">
+                        <span class="takeoff-label">ETA</span>
+                        <input type="date" class="takeoff-eta" data-takeoff-key="${escapeHtml(takeoffKey)}" value="${escapeHtml(takeoffEtaValue)}" title="Vendor-confirmed ETA (optional override)" />
+                        ${badgeHtml}
+                      </div>
+                      ${etaHint}`;
+                    } else if (takeoffValue === "received") {
+                      etaHtml = `<span class="badge supply-badge-ready">Ready</span>`;
+                    }
+
+                    return `
+                  <tr class="${rowClass}">
+                    <td data-label="Task">
+                      <div class="task-name-cell">
+                        <div class="task-name-top">
+                          <button
+                            type="button"
+                            class="task-name-button task-name-${task.severity.css}"
+                            data-task-detail-id="${escapeHtml(`task-detail-${lot.name}-${index}`)}"
+                            aria-expanded="false"
+                          >${escapeHtml(task.taskDisplayName)}</button>
+                          <label class="task-complete-control">
+                            <input type="checkbox" class="task-complete-toggle" data-task-key="${escapeHtml(task.key)}" ${taskCompleteChecked} />
+                            <span>Done</span>
+                          </label>
+                        </div>
+                        <div id="${escapeHtml(`task-detail-${lot.name}-${index}`)}" class="task-detail" hidden>${escapeHtml(task.taskName)}</div>
+                      </div>
+                    </td>
+                    <td data-label="Requested Start">${escapeHtml(task.requestedStartDisplay)}</td>
+                    <td data-label="Category">${escapeHtml(task.ruleLabel)}</td>
+                    <td data-label="Status" class="task-status"><span class="badge ${task.completed ? "status-complete" : `status-${task.severity.css}`}">${task.completed ? "Complete" : task.severity.label}</span></td>
+                    <td data-label="Takeoff" class="task-takeoff">
+                      <div class="takeoff-cell">
+                        <select class="takeoff-select ${takeoffClass}" data-takeoff-key="${escapeHtml(takeoffKey)}">
+                          <option value="">—</option>
+                          <option value="need-takeoff" ${takeoffValue === "need-takeoff" ? "selected" : ""}>Need Takeoff</option>
+                          <option value="ordered" ${takeoffValue === "ordered" ? "selected" : ""}>Ordered</option>
+                          <option value="received" ${takeoffValue === "received" ? "selected" : ""}>Received</option>
+                        </select>
+                        <select class="task-schedule-select ${scheduleClass}" data-schedule-key="${escapeHtml(takeoffKey)}" title="Labor scheduling status">
+                          <option value="">Scheduling —</option>
+                          <option value="needs-scheduling" ${scheduleValue === "needs-scheduling" ? "selected" : ""}>Needs Scheduling</option>
+                          <option value="scheduled" ${scheduleValue === "scheduled" ? "selected" : ""}>Scheduled</option>
+                        </select>
+                        ${etaHtml}
+                      </div>
+                    </td>
+                  </tr>
+                `;
+                  }
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+      grid.appendChild(lotCard);
+    }
+
+    dashboard.appendChild(details);
+  }
+
+  if (renderedSubdivisionCount === 0) {
+    dashboard.innerHTML = `<div class="empty">No subdivisions or lots match your current filter.</div>`;
+  }
+
+  const filtersActive = filterText || statusValue !== "all" || supplyGapFilter || needTakeoffFilter;
+  if (filtersActive) {
+    const statusLabel = statusValue === "all" ? "All" : severityDefinitions[statusValue].label;
+    const extras = [];
+    if (needTakeoffFilter) extras.push("Need Takeoff");
+    if (supplyGapFilter) extras.push("Supply Gaps");
+    const extraLabel = extras.length > 0 ? ` Filters: ${escapeHtml(extras.join(", "))}.` : "";
+    summary.innerHTML += `<p class="active-filter">Showing ${renderedSubdivisionCount} subdivisions and ${renderedLotCount} lots after filtering. Status: ${escapeHtml(statusLabel)}.${extraLabel}</p>`;
+  }
+}
+
+function groupRows(dataRows, rules) {
+  const bySubdivision = new Map();
+  const builderName = dataRows[0]["Builder Name"] || "Unknown Builder";
+  let taskCount = 0;
+
+  for (const row of dataRows) {
+    const subdivisionName = safeValue(row["Subdivision"]);
+    const lotName = safeValue(row["Lot / Block"]);
+    const taskName = safeValue(row["Task"]);
+    // All sheets are normalized to use "Adjusted Start Date" by detectColumns
+    const requestedStartRaw = safeValue(row["Adjusted Start Date"]);
+    const requestedStartDate = parseDate(requestedStartRaw);
+
+    if (!bySubdivision.has(subdivisionName)) {
+      bySubdivision.set(subdivisionName, {
+        name: subdivisionName,
+        lots: new Map()
+      });
+    }
+
+    const subdivision = bySubdivision.get(subdivisionName);
+    if (!subdivision.lots.has(lotName)) {
+      const lotKey = getLotCompletionKey(builderName, subdivisionName, lotName);
+      subdivision.lots.set(lotName, {
+        name: lotName,
+        key: lotKey,
+        completed: completedLotKeys.has(lotKey),
+        tasks: []
+      });
+    }
+
+    const lot = subdivision.lots.get(lotName);
+    const match = getRuleMatch(taskName, rules);
+    const severity = evaluateSeverity(requestedStartDate, match.days);
+    const taskKey = getTaskCompletionKey(lot.key, taskName, requestedStartRaw || "N/A");
+
+    lot.tasks.push({
+      key: taskKey,
+      taskName,
+      taskDisplayName: getTaskDisplayName(taskName),
+      requestedStartDisplay: requestedStartRaw || "N/A",
+      requestedStartDate,
+      ruleLabel: match.label,
+      isKeywordMatch: match.keywords?.length > 0,
+      leadDays: Number.isFinite(match.days) ? match.days : 0,
+      completed: taskCompletionStatus.get(taskKey) === true,
+      severity
+    });
+    taskCount += 1;
+  }
+
+  const subdivisions = [];
+  let lotCount = 0;
+
+  for (const subdivision of bySubdivision.values()) {
+    const lots = [];
+    let subdivisionMaxSeverity = severityDefinitions.safe;
+
+    for (const lot of subdivision.lots.values()) {
+      lot.tasks.sort((a, b) => {
+        const timeA = a.requestedStartDate ? a.requestedStartDate.getTime() : Infinity;
+        const timeB = b.requestedStartDate ? b.requestedStartDate.getTime() : Infinity;
+        return timeA - timeB;
+      });
+
+      lot.displayName = formatLotDisplayName(lot.name);
+
+      const activeTasks = lot.tasks.filter((task) => !task.completed);
+      const firstActiveTask = activeTasks[0] || null;
+      const lotSeverity = firstActiveTask ? firstActiveTask.severity : severityDefinitions.safe;
+
+      lot.lotSeverity = lotSeverity;
+      lot.earliestStartDisplay = firstActiveTask ? firstActiveTask.requestedStartDisplay : "N/A";
+      lot.earliestTaskName = firstActiveTask ? firstActiveTask.taskDisplayName : "All tasks complete";
+      lot.supplyGapCount = activeTasks.filter((t) => isSupplyGap(t, lot.key)).length;
+      lot.needTakeoffCount = activeTasks.filter((task) => taskTakeoffStatus.get(task.key) === "need-takeoff").length;
+      subdivisionMaxSeverity = lotSeverity.rank > subdivisionMaxSeverity.rank ? lotSeverity : subdivisionMaxSeverity;
+      lots.push(lot);
+      lotCount += 1;
+    }
+
+    lots.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+    subdivision.lots = lots;
+    subdivision.needTakeoffCount = lots.reduce((sum, lot) => sum + lot.needTakeoffCount, 0);
+    subdivision.maxSeverity = subdivisionMaxSeverity;
+    subdivisions.push(subdivision);
+  }
+
+  subdivisions.sort((a, b) => a.name.localeCompare(b.name));
+
+  return {
+    builderName,
+    subdivisions,
+    subdivisionCount: subdivisions.length,
+    lotCount,
+    taskCount
+  };
+}
+
+const severityDefinitions = {
+  safe: { rank: 1, label: "Safe", css: "safe" },
+  watch: { rank: 2, label: "Watch", css: "watch" },
+  risk: { rank: 3, label: "At Risk", css: "risk" },
+  overdue: { rank: 4, label: "Late", css: "overdue" }
+};
+
+function evaluateSeverity(startDate, leadDays) {
+  if (!startDate || !Number.isFinite(leadDays) || leadDays <= 0) {
+    return severityDefinitions.safe;
+  }
+
+  const now = new Date();
+  const dayMs = 24 * 60 * 60 * 1000;
+  const daysUntilStart = Math.floor((startDate - now) / dayMs);
+
+  if (daysUntilStart < 0) {
+    return severityDefinitions.overdue;
+  }
+  if (daysUntilStart < leadDays) {
+    return severityDefinitions.risk;
+  }
+  if (daysUntilStart < leadDays + 14) {
+    return severityDefinitions.watch;
+  }
+  return severityDefinitions.safe;
+}
+
+function convertLeadToDays(amount, unit) {
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return 0;
+  }
+
+  return unit === "weeks" ? amount * 7 : amount;
+}
+
+function getRuleMatch(taskName, rules) {
+  const lowerTask = (taskName || "").toLowerCase();
+  for (const rule of rules) {
+    if (rule.keywords.length === 0) {
+      continue;
+    }
+    if (rule.keywords.some((keyword) => lowerTask.includes(keyword))) {
+      return rule;
+    }
+  }
+
+  const general = rules.find((rule) => rule.keywords.length === 0);
+  return general || { label: "No Rule", days: 14 };
+}
+
+function getLotCompletionKey(builderName, subdivisionName, lotName) {
+  return [builderName, subdivisionName, lotName]
+    .map((value) => String(value || "").trim().toLowerCase())
+    .join("||");
+}
+
+function getSubdivisionKey(builderName, subdivisionName) {
+  return [builderName, subdivisionName]
+    .map((value) => String(value || "").trim().toLowerCase())
+    .join("||");
+}
+
+function parseDate(value) {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed;
+  }
+
+  return null;
+}
+
+function getTaskDisplayName(taskName) {
+  const name = String(taskName || "").trim();
+  const bracketIndex = name.indexOf("[");
+  if (bracketIndex <= 0) {
+    return name;
+  }
+  return name.slice(0, bracketIndex).trim();
+}
+
+function formatLotDisplayName(lotName) {
+  const name = String(lotName || "").trim();
+  if (!name) {
+    return "Unknown";
+  }
+
+  return name.replace(/\b0+(\d+)\b/g, (_, digits) => String(Number(digits)));
+}
+
+function safeValue(value) {
+  if (value === null || value === undefined || value === "") {
+    return "Unknown";
+  }
+  return String(value).trim();
+}
+
+function renderEmpty(message) {
+  setSetupState(false);
+  summary.innerHTML = "";
+  metrics.innerHTML = "";
+  dashboard.innerHTML = `<div class="empty">${escapeHtml(message)}</div>`;
+}
+
+function countSeverityByLots(subdivisions) {
+  const counts = {
+    overdue: 0,
+    risk: 0,
+    watch: 0,
+    safe: 0
+  };
+
+  for (const subdivision of subdivisions) {
+    for (const lot of subdivision.lots) {
+      if (lot.completed) {
+        continue;
+      }
+      counts[lot.lotSeverity.css] += 1;
+    }
+  }
+
+  return counts;
+}
+
+function persistRules() {
+  try {
+    localStorage.setItem(RULES_STORAGE_KEY, JSON.stringify(getRules()));
+  } catch (error) {
+    console.error("Failed to persist rules:", error);
+  }
+}
+
+function restoreRules() {
+  try {
+    const stored = localStorage.getItem(RULES_STORAGE_KEY);
+    if (!stored) {
+      return [];
+    }
+
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed
+      .map((rule) => ({
+        label: String(rule.label || "").trim(),
+        keywords: Array.isArray(rule.keywords)
+          ? rule.keywords.join(", ")
+          : String(rule.keywords || "").trim(),
+        amount: (() => {
+          const explicitAmount = Number(rule.amount);
+          if (Number.isFinite(explicitAmount) && explicitAmount > 0) {
+            return explicitAmount;
+          }
+
+          const explicitDays = Number(rule.days);
+          if (Number.isFinite(explicitDays) && explicitDays > 0) {
+            return explicitDays;
+          }
+
+          const legacyWeeks = Number(rule.weeks);
+          if (Number.isFinite(legacyWeeks) && legacyWeeks > 0) {
+            return legacyWeeks;
+          }
+
+          return 0;
+        })(),
+        unit: (() => {
+          if (rule.unit === "weeks" || rule.unit === "days") {
+            return rule.unit;
+          }
+
+          const hasDays = Number(rule.days) > 0;
+          if (hasDays) {
+            return "days";
+          }
+
+          return "weeks";
+        })(),
+        days: (() => {
+          const explicitDays = Number(rule.days);
+          if (Number.isFinite(explicitDays) && explicitDays > 0 && !(rule.unit === "weeks" || rule.unit === "days")) {
+            return explicitDays;
+          }
+
+          const amount = Number(rule.amount);
+          if (Number.isFinite(amount) && amount > 0) {
+            return convertLeadToDays(amount, rule.unit === "weeks" ? "weeks" : "days");
+          }
+
+          const legacyWeeks = Number(rule.weeks);
+          if (Number.isFinite(legacyWeeks) && legacyWeeks > 0) {
+            return convertLeadToDays(legacyWeeks, "weeks");
+          }
+
+          return convertLeadToDays(Number(rule.days), "days");
+        })()
+      }))
+      .filter((rule) => rule.days > 0);
+  } catch (error) {
+    console.error("Failed to restore rules:", error);
+    return [];
+  }
+}
+
+function persistCompletedLots() {
+  try {
+    localStorage.setItem(LOT_COMPLETION_STORAGE_KEY, JSON.stringify([...completedLotKeys]));
+  } catch (error) {
+    console.error("Failed to persist completed lots:", error);
+  }
+}
+
+function exportCompletedLots() {
+  try {
+    const payload = {
+      version: 5,
+      exportedAt: new Date().toISOString(),
+      completedLotKeys: [...completedLotKeys].sort(),
+      taskTakeoffStatus: Object.fromEntries(taskTakeoffStatus),
+      taskTakeoffEta: Object.fromEntries(taskTakeoffEta),
+      taskTakeoffOrderDate: Object.fromEntries(taskTakeoffOrderDate),
+      taskSchedulingStatus: Object.fromEntries(taskSchedulingStatus),
+      taskCompletionStatus: Object.fromEntries(taskCompletionStatus)
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const dateTag = new Date().toISOString().slice(0, 10);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `builder-dashboard-completed-lots-${dateTag}.json`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+
+    setTransferStatus(`Exported ${completedLotKeys.size} completed lots.`, "success");
+  } catch (error) {
+    console.error("Failed to export completed lots:", error);
+    setTransferStatus("Could not export completed list.", "error");
+  }
+}
+
+async function importCompletedLots(file, mode = "replace") {
+  try {
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    const importedKeysRaw = Array.isArray(parsed)
+      ? parsed
+      : Array.isArray(parsed?.completedLotKeys)
+        ? parsed.completedLotKeys
+        : null;
+
+    if (!importedKeysRaw) {
+      throw new Error("Invalid completed list format.");
+    }
+
+    const importedSet = new Set(
+      importedKeysRaw
+        .map((key) => String(key || "").trim().toLowerCase())
+        .filter(Boolean)
+    );
+
+    if (mode === "merge") {
+      completedLotKeys = new Set([...completedLotKeys, ...importedSet]);
+    } else {
+      completedLotKeys = importedSet;
+    }
+
+    // Handle takeoff status import
+    if (parsed?.taskTakeoffStatus && typeof parsed.taskTakeoffStatus === "object" && !Array.isArray(parsed.taskTakeoffStatus)) {
+      const importedTakeoff = new Map(
+        Object.entries(parsed.taskTakeoffStatus)
+          .filter(([, v]) => ["need-takeoff", "ordered", "received"].includes(v))
+      );
+      if (mode === "merge") {
+        for (const [k, v] of importedTakeoff) {
+          taskTakeoffStatus.set(k, v);
+        }
+      } else {
+        taskTakeoffStatus = importedTakeoff;
+      }
+    } else if (mode === "replace") {
+      taskTakeoffStatus = new Map();
+    }
+    persistTakeoffStatus();
+
+    // Handle takeoff ETA import
+    if (parsed?.taskTakeoffEta && typeof parsed.taskTakeoffEta === "object" && !Array.isArray(parsed.taskTakeoffEta)) {
+      const importedEta = new Map(
+        Object.entries(parsed.taskTakeoffEta)
+          .filter(([, v]) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v))
+      );
+      if (mode === "merge") {
+        for (const [k, v] of importedEta) {
+          taskTakeoffEta.set(k, v);
+        }
+      } else {
+        taskTakeoffEta = importedEta;
+      }
+    } else if (mode === "replace") {
+      taskTakeoffEta = new Map();
+    }
+    persistTakeoffEta();
+
+    // Handle takeoff order date import
+    if (parsed?.taskTakeoffOrderDate && typeof parsed.taskTakeoffOrderDate === "object" && !Array.isArray(parsed.taskTakeoffOrderDate)) {
+      const importedOrderDate = new Map(
+        Object.entries(parsed.taskTakeoffOrderDate)
+          .filter(([, v]) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v))
+      );
+      if (mode === "merge") {
+        for (const [k, v] of importedOrderDate) {
+          taskTakeoffOrderDate.set(k, v);
+        }
+      } else {
+        taskTakeoffOrderDate = importedOrderDate;
+      }
+    } else if (mode === "replace") {
+      taskTakeoffOrderDate = new Map();
+    }
+    persistTakeoffOrderDate();
+
+    // Handle task scheduling status import
+    if (parsed?.taskSchedulingStatus && typeof parsed.taskSchedulingStatus === "object" && !Array.isArray(parsed.taskSchedulingStatus)) {
+      const importedScheduling = new Map(
+        Object.entries(parsed.taskSchedulingStatus)
+          .filter(([, v]) => ["needs-scheduling", "scheduled"].includes(v))
+      );
+      if (mode === "merge") {
+        for (const [k, v] of importedScheduling) {
+          taskSchedulingStatus.set(k, v);
+        }
+      } else {
+        taskSchedulingStatus = importedScheduling;
+      }
+    } else if (mode === "replace") {
+      taskSchedulingStatus = new Map();
+    }
+    persistTaskSchedulingStatus();
+
+    // Handle task completion status import
+    if (parsed?.taskCompletionStatus && typeof parsed.taskCompletionStatus === "object" && !Array.isArray(parsed.taskCompletionStatus)) {
+      const importedTaskCompletion = new Map(
+        Object.entries(parsed.taskCompletionStatus)
+          .filter(([, v]) => v === true)
+      );
+      if (mode === "merge") {
+        for (const [k, v] of importedTaskCompletion) {
+          taskCompletionStatus.set(k, v);
+        }
+      } else {
+        taskCompletionStatus = importedTaskCompletion;
+      }
+    } else if (mode === "replace") {
+      taskCompletionStatus = new Map();
+    }
+    persistTaskCompletionStatus();
+
+    completionUndoStack = [];
+    completionRedoStack = [];
+
+    persistCompletedLots();
+    if (rows.length > 0) {
+      renderDashboard(rows, currentSourceName);
+    }
+    updateCompletionHistoryControls();
+
+    const modeLabel = mode === "merge" ? "Merged" : "Replaced with";
+    setTransferStatus(`${modeLabel} ${completedLotKeys.size} completed lots.`, "success");
+  } catch (error) {
+    console.error("Failed to import completed lots:", error);
+    setTransferStatus("Could not import completed list. Use a valid JSON export file.", "error");
+  }
+}
+
+function setTransferStatus(message, state) {
+  transferStatus.textContent = message;
+  transferStatus.classList.toggle("success", state === "success");
+  transferStatus.classList.toggle("error", state === "error");
+}
+
+function updateCompletionHistoryControls() {
+  const hasData = rows.length > 0;
+  undoBtn.disabled = !hasData || completionUndoStack.length === 0;
+  redoBtn.disabled = !hasData || completionRedoStack.length === 0;
+}
+
+function applyLotCompletion(lotKey, isCompleted) {
+  if (isCompleted) {
+    completedLotKeys.add(lotKey);
+  } else {
+    completedLotKeys.delete(lotKey);
+  }
+
+  persistCompletedLots();
+  if (rows.length > 0) {
+    renderDashboard(rows, currentSourceName);
+  }
+  updateCompletionHistoryControls();
+}
+
+function undoCompletionChange() {
+  if (completionUndoStack.length === 0) {
+    return;
+  }
+
+  const action = completionUndoStack.pop();
+  completionRedoStack.push(action);
+  applyLotCompletion(action.lotKey, action.previousCompleted);
+}
+
+function redoCompletionChange() {
+  if (completionRedoStack.length === 0) {
+    return;
+  }
+
+  const action = completionRedoStack.pop();
+  completionUndoStack.push(action);
+  applyLotCompletion(action.lotKey, action.nextCompleted);
+}
+
+function isEditableTarget(target) {
+  const el = target instanceof Element ? target : null;
+  if (!el) {
+    return false;
+  }
+
+  return Boolean(el.closest("input, textarea, select, [contenteditable='true']"));
+}
+
+function restoreCompletedLots() {
+  try {
+    const stored = localStorage.getItem(LOT_COMPLETION_STORAGE_KEY);
+    if (!stored) {
+      return new Set();
+    }
+
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) {
+      return new Set();
+    }
+
+    return new Set(parsed.map((key) => String(key)));
+  } catch (error) {
+    console.error("Failed to restore completed lots:", error);
+    return new Set();
+  }
+}
+
+function clearLegacyWorkbookStorage() {
+  try {
+    for (const key of LEGACY_WORKBOOK_STORAGE_KEYS) {
+      localStorage.removeItem(key);
+    }
+  } catch (error) {
+    console.error("Failed to clear legacy workbook storage:", error);
+  }
+}
+
+function getTaskCompletionKey(lotKey, taskName, requestedStartDisplay) {
+  return `${lotKey}||${String(taskName || "").trim().toLowerCase()}||${String(requestedStartDisplay || "").trim()}`;
+}
+
+function getTaskTakeoffKey(lotKey, taskName, requestedStartDisplay) {
+  return getTaskCompletionKey(lotKey, taskName, requestedStartDisplay);
+}
+
+function isSupplyGap(task, lotKey) {
+  if (task.completed) {
+    return false;
+  }
+
+  const key = getTaskTakeoffKey(lotKey, task.taskName, task.requestedStartDisplay);
+  const scheduling = taskSchedulingStatus.get(key) || "";
+  if (scheduling === "needs-scheduling") {
+    return true;
+  }
+
+  const status = taskTakeoffStatus.get(key) || "";
+
+  // If manually tagged, evaluate based on resolution
+  if (status) {
+    if (status === "received") return false;
+    const eta = resolveTaskEta(
+      status,
+      taskTakeoffEta.get(key) || "",
+      taskTakeoffOrderDate.get(key) || "",
+      task.leadDays
+    );
+    const supply = computeSupplyStatus(status, eta, task.requestedStartDate);
+    // Ordered + on-track ETA is resolved
+    if (status === "ordered" && supply?.label === "On Track") return false;
+    return true; // need-takeoff, ordered with no/late ETA
+  }
+
+  // Not tagged: flag only tasks that matched a specific lead-time rule (not the general fallback)
+  return task.isKeywordMatch === true;
+}
+
+function computeSupplyStatus(takeoffValue, eta, taskStartDate) {
+  if (takeoffValue === "received") {
+    return { label: "Ready", badgeClass: "supply-badge-ready" };
+  }
+  if (takeoffValue !== "ordered" || !eta) {
+    return null;
+  }
+  const etaDate = parseDate(eta);
+  if (!etaDate) return null;
+  if (!taskStartDate) return { label: "ETA Set", badgeClass: "supply-badge-good" };
+  // ETA on or before task start date means materials will arrive in time
+  return etaDate <= taskStartDate
+    ? { label: "On Track", badgeClass: "supply-badge-good" }
+    : { label: "Late ETA", badgeClass: "supply-badge-late" };
+}
+
+function resolveTaskEta(takeoffValue, manualEta, orderDate, leadDays) {
+  if (takeoffValue !== "ordered") {
+    return "";
+  }
+
+  if (isIsoDateString(manualEta)) {
+    return manualEta;
+  }
+
+  if (!isIsoDateString(orderDate) || !Number.isFinite(leadDays) || leadDays < 0) {
+    return "";
+  }
+
+  return addDaysToIsoDate(orderDate, leadDays);
+}
+
+function addDaysToIsoDate(dateValue, days) {
+  const base = parseDate(dateValue);
+  if (!base || !Number.isFinite(days)) {
+    return "";
+  }
+
+  const shifted = new Date(base.getTime());
+  shifted.setDate(shifted.getDate() + Math.round(days));
+  const year = shifted.getFullYear();
+  const month = String(shifted.getMonth() + 1).padStart(2, "0");
+  const day = String(shifted.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function isIsoDateString(value) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function persistTakeoffStatus() {
+  try {
+    localStorage.setItem(LOT_TAKEOFF_STATUS_STORAGE_KEY, JSON.stringify(Object.fromEntries(taskTakeoffStatus)));
+  } catch (error) {
+    console.error("Failed to persist takeoff status:", error);
+  }
+}
+
+function restoreTakeoffStatus() {
+  try {
+    const stored = localStorage.getItem(LOT_TAKEOFF_STATUS_STORAGE_KEY);
+    if (!stored) return new Map();
+    const parsed = JSON.parse(stored);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return new Map();
+    return new Map(
+      Object.entries(parsed)
+        .filter(([, v]) => ["need-takeoff", "ordered", "received"].includes(v))
+    );
+  } catch (error) {
+    console.error("Failed to restore takeoff status:", error);
+    return new Map();
+  }
+}
+
+function persistTakeoffEta() {
+  try {
+    localStorage.setItem(LOT_TAKEOFF_ETA_STORAGE_KEY, JSON.stringify(Object.fromEntries(taskTakeoffEta)));
+  } catch (error) {
+    console.error("Failed to persist takeoff ETA:", error);
+  }
+}
+
+function restoreTakeoffEta() {
+  try {
+    const stored = localStorage.getItem(LOT_TAKEOFF_ETA_STORAGE_KEY);
+    if (!stored) return new Map();
+    const parsed = JSON.parse(stored);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return new Map();
+    return new Map(
+      Object.entries(parsed)
+        .filter(([, v]) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v))
+    );
+  } catch (error) {
+    console.error("Failed to restore takeoff ETA:", error);
+    return new Map();
+  }
+}
+
+function persistTakeoffOrderDate() {
+  try {
+    localStorage.setItem(LOT_TAKEOFF_ORDER_DATE_STORAGE_KEY, JSON.stringify(Object.fromEntries(taskTakeoffOrderDate)));
+  } catch (error) {
+    console.error("Failed to persist takeoff order date:", error);
+  }
+}
+
+function restoreTakeoffOrderDate() {
+  try {
+    const stored = localStorage.getItem(LOT_TAKEOFF_ORDER_DATE_STORAGE_KEY);
+    if (!stored) return new Map();
+    const parsed = JSON.parse(stored);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return new Map();
+    return new Map(
+      Object.entries(parsed)
+        .filter(([, v]) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v))
+    );
+  } catch (error) {
+    console.error("Failed to restore takeoff order date:", error);
+    return new Map();
+  }
+}
+
+function persistTaskSchedulingStatus() {
+  try {
+    localStorage.setItem(LOT_TASK_SCHEDULING_STATUS_STORAGE_KEY, JSON.stringify(Object.fromEntries(taskSchedulingStatus)));
+  } catch (error) {
+    console.error("Failed to persist task scheduling status:", error);
+  }
+}
+
+function restoreTaskSchedulingStatus() {
+  try {
+    const stored = localStorage.getItem(LOT_TASK_SCHEDULING_STATUS_STORAGE_KEY);
+    if (!stored) return new Map();
+    const parsed = JSON.parse(stored);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return new Map();
+    return new Map(
+      Object.entries(parsed)
+        .filter(([, v]) => ["needs-scheduling", "scheduled"].includes(v))
+    );
+  } catch (error) {
+    console.error("Failed to restore task scheduling status:", error);
+    return new Map();
+  }
+}
+
+function persistTaskCompletionStatus() {
+  try {
+    localStorage.setItem(LOT_TASK_COMPLETION_STORAGE_KEY, JSON.stringify(Object.fromEntries(taskCompletionStatus)));
+  } catch (error) {
+    console.error("Failed to persist task completion status:", error);
+  }
+}
+
+function restoreTaskCompletionStatus() {
+  try {
+    const stored = localStorage.getItem(LOT_TASK_COMPLETION_STORAGE_KEY);
+    if (!stored) return new Map();
+    const parsed = JSON.parse(stored);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return new Map();
+    return new Map(
+      Object.entries(parsed)
+        .filter(([, v]) => v === true)
+    );
+  } catch (error) {
+    console.error("Failed to restore task completion status:", error);
+    return new Map();
+  }
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+  </script>
+</body>
+</html>
