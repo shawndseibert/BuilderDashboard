@@ -601,7 +601,7 @@ button.danger:hover {
 
 .metrics {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 8px;
   margin-bottom: 10px;
 }
@@ -656,6 +656,15 @@ button.danger:hover {
   border-left: 4px solid var(--safe);
 }
 
+.metric-takeoff {
+  border-left: 4px solid #f97316;
+}
+
+.metric-takeoff.active {
+  border-color: #fdba74;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.28);
+}
+
 .subdivision {
   margin: 8px 0;
   border: 1px solid var(--border);
@@ -706,6 +715,15 @@ button.danger:hover {
   margin: 0;
   color: var(--text-dim);
   font-size: 0.82rem;
+}
+
+.subdivision-badges,
+.lot-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .lots-grid {
@@ -886,27 +904,284 @@ button.danger:hover {
 
 .task-table th:nth-child(1),
 .task-table td:nth-child(1) {
-  width: 43%;
+  width: 35%;
 }
 
 .task-table th:nth-child(2),
 .task-table td:nth-child(2) {
-  width: 19%;
+  width: 17%;
 }
 
 .task-table th:nth-child(3),
 .task-table td:nth-child(3) {
-  width: 18%;
+  width: 15%;
 }
 
 .task-status {
-  width: 20%;
+  width: 15%;
+}
+
+.task-takeoff {
+  width: 18%;
+}
+
+.takeoff-select {
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-alt);
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.takeoff-select option {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+.takeoff-select:focus {
+  outline: none;
+  border-color: var(--blue-strong);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.takeoff-select.takeoff-need-takeoff {
+  background: rgba(249, 115, 22, 0.15);
+  color: #fdba74;
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+.takeoff-select.takeoff-ordered {
+  background: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+.takeoff-select.takeoff-received {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.task-schedule-select {
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-alt);
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.task-schedule-select option {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+.task-schedule-select:focus {
+  outline: none;
+  border-color: var(--blue-strong);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.task-schedule-select.schedule-needs-scheduling {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fef3c7;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.task-schedule-select.schedule-scheduled {
+  background: rgba(16, 185, 129, 0.22);
+  color: #d1fae5;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.takeoff-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.takeoff-eta-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.takeoff-order-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.takeoff-label {
+  min-width: 36px;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.takeoff-eta {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 3px 5px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-alt);
+  color: var(--text);
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+
+.takeoff-order-date {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 3px 5px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-alt);
+  color: var(--text);
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+
+.takeoff-eta:focus {
+  outline: none;
+  border-color: var(--blue-strong);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.takeoff-order-date:focus {
+  outline: none;
+  border-color: var(--blue-strong);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.takeoff-eta-hint {
+  color: var(--text-dim);
+  font-size: 0.7rem;
+}
+
+.supply-badge-good {
+  background: rgba(16, 185, 129, 0.22);
+  color: #6ee7b7;
+  white-space: nowrap;
+}
+
+.supply-badge-late {
+  background: rgba(225, 29, 72, 0.22);
+  color: #fda4af;
+  white-space: nowrap;
+}
+
+.supply-badge-ready {
+  background: rgba(16, 185, 129, 0.22);
+  color: #6ee7b7;
+}
+
+.supply-badge-ready {
+  background: rgba(16, 185, 129, 0.22);
+  color: #6ee7b7;
+}
+
+.metric-supply {
+  border-left: 4px solid #f59e0b;
+}
+
+.metric-supply.active {
+  border-color: #fcd34d;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+}
+
+.lot-supply-gap {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.18);
+  color: #fcd34d;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+
+.need-takeoff-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px 3px 8px;
+  border-radius: 999px;
+  background: rgba(249, 115, 22, 0.2);
+  color: #fdba74;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.need-takeoff-count {
+  min-width: 20px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(249, 115, 22, 0.38);
+  color: #fff7ed;
+  text-align: center;
+}
+
+.supply-gap-btn {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.supply-gap-btn:hover {
+  background: rgba(245, 158, 11, 0.22);
+}
+
+.supply-gap-btn.active {
+  background: rgba(245, 158, 11, 0.28);
+  border-color: #fcd34d;
+  color: #fff;
 }
 
 .task-name-cell {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.task-name-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.task-complete-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.task-complete-control input {
+  margin: 0;
+  accent-color: #94a3b8;
 }
 
 .task-name-button {
@@ -953,6 +1228,15 @@ button.danger:hover {
   line-height: 1.35;
 }
 
+.task-row-complete {
+  opacity: 0.6;
+}
+
+.task-row-complete .task-name-button,
+.task-row-complete .task-detail {
+  text-decoration: line-through;
+}
+
 .task-detail[hidden] {
   display: none;
 }
@@ -987,6 +1271,12 @@ button.danger:hover {
     justify-content: flex-start;
   }
 
+  .metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
   .metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1116,7 +1406,7 @@ button.danger:hover {
   .command-actions {
     justify-content: stretch;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .command-actions .secondary.inline {
@@ -1252,7 +1542,8 @@ button.danger:hover {
   .task-table td:nth-child(1),
   .task-table td:nth-child(2),
   .task-table td:nth-child(3),
-  .task-status {
+  .task-status,
+  .task-takeoff {
     width: 100%;
   }
 
@@ -1358,6 +1649,7 @@ button.danger:hover {
         <input id="lotSearch" type="search" placeholder="Search subdivision, lot, or task" />
         <div class="command-actions">
           <button id="clearFiltersBtn" class="secondary inline" type="button">Clear Filters</button>
+          <button id="supplyGapBtn" class="secondary inline supply-gap-btn" type="button">Supply Gaps</button>
           <button id="expandAllBtn" class="secondary inline">Expand All</button>
           <button id="collapseAllBtn" class="secondary inline">Collapse All</button>
         </div>
@@ -1417,11 +1709,17 @@ const resultsPanel = document.querySelector(".results");
 const ruleTemplate = document.getElementById("ruleTemplate");
 const lotSearch = document.getElementById("lotSearch");
 const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+const supplyGapBtn = document.getElementById("supplyGapBtn");
 const expandAllBtn = document.getElementById("expandAllBtn");
 const collapseAllBtn = document.getElementById("collapseAllBtn");
 const topbarTabs = [...document.querySelectorAll(".topbar-tab")];
 const RULES_STORAGE_KEY = "builder_dashboard_rules";
 const LOT_COMPLETION_STORAGE_KEY = "builder_dashboard_completed_lots";
+const LOT_TAKEOFF_STATUS_STORAGE_KEY = "builder_dashboard_takeoff_status";
+const LOT_TAKEOFF_ETA_STORAGE_KEY = "builder_dashboard_takeoff_eta";
+const LOT_TAKEOFF_ORDER_DATE_STORAGE_KEY = "builder_dashboard_takeoff_order_date";
+const LOT_TASK_SCHEDULING_STATUS_STORAGE_KEY = "builder_dashboard_task_scheduling_status";
+const LOT_TASK_COMPLETION_STORAGE_KEY = "builder_dashboard_task_completion_status";
 const LEGACY_WORKBOOK_STORAGE_KEYS = [
   "builder_dashboard_workbook_base64",
   "builder_dashboard_workbook_name"
@@ -1430,7 +1728,14 @@ const LEGACY_WORKBOOK_STORAGE_KEYS = [
 let rows = [];
 let currentSourceName = "Uploaded file";
 let activeStatusFilter = "all";
+let supplyGapFilter = false;
+let needTakeoffFilter = false;
 let completedLotKeys = restoreCompletedLots();
+let taskTakeoffStatus = restoreTakeoffStatus();
+let taskTakeoffEta = restoreTakeoffEta();
+let taskTakeoffOrderDate = restoreTakeoffOrderDate();
+let taskSchedulingStatus = restoreTaskSchedulingStatus();
+let taskCompletionStatus = restoreTaskCompletionStatus();
 let completionUndoStack = [];
 let completionRedoStack = [];
 
@@ -1597,7 +1902,18 @@ lotSearch.addEventListener("input", () => {
 
 clearFiltersBtn.addEventListener("click", () => {
   activeStatusFilter = "all";
+  supplyGapFilter = false;
+  needTakeoffFilter = false;
+  supplyGapBtn.classList.remove("active");
   lotSearch.value = "";
+  if (rows.length > 0) {
+    renderDashboard(rows, currentSourceName);
+  }
+});
+
+supplyGapBtn.addEventListener("click", () => {
+  supplyGapFilter = !supplyGapFilter;
+  supplyGapBtn.classList.toggle("active", supplyGapFilter);
   if (rows.length > 0) {
     renderDashboard(rows, currentSourceName);
   }
@@ -1613,14 +1929,31 @@ redoBtn.addEventListener("click", () => {
 
 metrics.addEventListener("click", (event) => {
   const button = event.target.closest("button.metric-card[data-status]");
-  if (!button) {
+  if (button) {
+    const selected = button.dataset.status;
+    activeStatusFilter = activeStatusFilter === selected ? "all" : selected;
+    if (rows.length > 0) {
+      renderDashboard(rows, currentSourceName);
+    }
     return;
   }
 
-  const selected = button.dataset.status;
-  activeStatusFilter = activeStatusFilter === selected ? "all" : selected;
-  if (rows.length > 0) {
-    renderDashboard(rows, currentSourceName);
+  const takeoffBtn = event.target.closest("#needTakeoffMetricBtn");
+  if (takeoffBtn) {
+    needTakeoffFilter = !needTakeoffFilter;
+    if (rows.length > 0) {
+      renderDashboard(rows, currentSourceName);
+    }
+    return;
+  }
+
+  const supplyBtn = event.target.closest("#supplyGapMetricBtn");
+  if (supplyBtn) {
+    supplyGapFilter = !supplyGapFilter;
+    supplyGapBtn.classList.toggle("active", supplyGapFilter);
+    if (rows.length > 0) {
+      renderDashboard(rows, currentSourceName);
+    }
   }
 });
 
@@ -1646,6 +1979,84 @@ dashboard.addEventListener("click", (event) => {
 });
 
 dashboard.addEventListener("change", (event) => {
+  const taskCompleteToggle = event.target.closest(".task-complete-toggle");
+  if (taskCompleteToggle) {
+    const key = taskCompleteToggle.dataset.taskKey;
+    if (!key) return;
+    if (taskCompleteToggle.checked) {
+      taskCompletionStatus.set(key, true);
+    } else {
+      taskCompletionStatus.delete(key);
+    }
+    persistTaskCompletionStatus();
+    if (rows.length > 0) renderDashboard(rows, currentSourceName);
+    return;
+  }
+
+  const schedulingSelect = event.target.closest(".task-schedule-select");
+  if (schedulingSelect) {
+    const key = schedulingSelect.dataset.scheduleKey;
+    if (!key) return;
+    const value = schedulingSelect.value;
+    if (value) {
+      taskSchedulingStatus.set(key, value);
+    } else {
+      taskSchedulingStatus.delete(key);
+    }
+    persistTaskSchedulingStatus();
+    if (rows.length > 0) renderDashboard(rows, currentSourceName);
+    return;
+  }
+
+  const takeoffSelect = event.target.closest(".takeoff-select");
+  if (takeoffSelect) {
+    const key = takeoffSelect.dataset.takeoffKey;
+    if (!key) return;
+    const value = takeoffSelect.value;
+    if (value) {
+      taskTakeoffStatus.set(key, value);
+    } else {
+      taskTakeoffStatus.delete(key);
+      taskTakeoffEta.delete(key);
+      taskTakeoffOrderDate.delete(key);
+    }
+    persistTakeoffStatus();
+    persistTakeoffEta();
+    persistTakeoffOrderDate();
+    if (rows.length > 0) renderDashboard(rows, currentSourceName);
+    return;
+  }
+
+  const takeoffOrderDateInput = event.target.closest(".takeoff-order-date");
+  if (takeoffOrderDateInput) {
+    const key = takeoffOrderDateInput.dataset.takeoffKey;
+    if (!key) return;
+    const value = takeoffOrderDateInput.value;
+    if (value) {
+      taskTakeoffOrderDate.set(key, value);
+    } else {
+      taskTakeoffOrderDate.delete(key);
+    }
+    persistTakeoffOrderDate();
+    if (rows.length > 0) renderDashboard(rows, currentSourceName);
+    return;
+  }
+
+  const takeoffEtaInput = event.target.closest(".takeoff-eta");
+  if (takeoffEtaInput) {
+    const key = takeoffEtaInput.dataset.takeoffKey;
+    if (!key) return;
+    const value = takeoffEtaInput.value;
+    if (value) {
+      taskTakeoffEta.set(key, value);
+    } else {
+      taskTakeoffEta.delete(key);
+    }
+    persistTakeoffEta();
+    if (rows.length > 0) renderDashboard(rows, currentSourceName);
+    return;
+  }
+
   const toggle = event.target.closest(".lot-complete-toggle");
   if (!toggle) {
     return;
@@ -1775,6 +2186,7 @@ function setSetupState(hasData) {
 
   lotSearch.disabled = !hasData;
   clearFiltersBtn.disabled = !hasData;
+  supplyGapBtn.disabled = !hasData;
   expandAllBtn.disabled = !hasData;
   collapseAllBtn.disabled = !hasData;
   undoBtn.disabled = !hasData || completionUndoStack.length === 0;
@@ -1784,6 +2196,9 @@ function setSetupState(hasData) {
     return;
   }
 
+  supplyGapFilter = false;
+  needTakeoffFilter = false;
+  supplyGapBtn.classList.remove("active");
   activateTab("tab-data");
 }
 
@@ -1989,6 +2404,12 @@ function renderDashboard(dataRows, sourceName = "Uploaded file") {
   const rules = getRules();
   const grouped = groupRows(dataRows, rules);
   const severityCounts = countSeverityByLots(grouped.subdivisions);
+  const supplyGapLotCount = grouped.subdivisions.reduce((sum, sub) => {
+    return sum + sub.lots.filter((lot) => !lot.completed && lot.supplyGapCount > 0).length;
+  }, 0);
+  const totalNeedTakeoffCount = grouped.subdivisions.reduce((sum, sub) => {
+    return sum + sub.lots.reduce((lotSum, lot) => lotSum + lot.needTakeoffCount, 0);
+  }, 0);
   const filterText = lotSearch.value.trim().toLowerCase();
   const statusValue = activeStatusFilter;
   const builderName = grouped.builderName || "Unknown Builder";
@@ -2002,6 +2423,8 @@ function renderDashboard(dataRows, sourceName = "Uploaded file") {
     <button type="button" class="metric-card metric-risk ${statusValue === "risk" ? "active" : ""}" data-status="risk"><p>At Risk Lots</p><h3>${severityCounts.risk}</h3></button>
     <button type="button" class="metric-card metric-watch ${statusValue === "watch" ? "active" : ""}" data-status="watch"><p>Watch Lots</p><h3>${severityCounts.watch}</h3></button>
     <button type="button" class="metric-card metric-safe ${statusValue === "safe" ? "active" : ""}" data-status="safe"><p>Safe Lots</p><h3>${severityCounts.safe}</h3></button>
+    <button type="button" class="metric-card metric-takeoff ${needTakeoffFilter ? "active" : ""}" id="needTakeoffMetricBtn"><p>Need Takeoff</p><h3>${totalNeedTakeoffCount}</h3></button>
+    <button type="button" class="metric-card metric-supply ${supplyGapFilter ? "active" : ""}" id="supplyGapMetricBtn"><p>Supply Gaps</p><h3>${supplyGapLotCount}</h3></button>
   `;
 
   const openSubdivisionKeys = new Set(
@@ -2031,6 +2454,14 @@ function renderDashboard(dataRows, sourceName = "Uploaded file") {
         return false;
       }
 
+      if (supplyGapFilter && lot.supplyGapCount === 0) {
+        return false;
+      }
+
+      if (needTakeoffFilter && lot.needTakeoffCount === 0) {
+        return false;
+      }
+
       if (!filterText) {
         return true;
       }
@@ -2055,6 +2486,8 @@ function renderDashboard(dataRows, sourceName = "Uploaded file") {
     renderedSubdivisionCount += 1;
     renderedLotCount += visibleLots.length;
 
+    const subdivisionNeedTakeoffCount = visibleLots.reduce((sum, lot) => sum + lot.needTakeoffCount, 0);
+
     const details = document.createElement("details");
     details.className = "subdivision";
     const subdivisionKey = getSubdivisionKey(builderName, subdivision.name);
@@ -2074,7 +2507,10 @@ function renderDashboard(dataRows, sourceName = "Uploaded file") {
           <h3>${escapeHtml(subdivision.name)}</h3>
           <p>${visibleLots.length} lots</p>
         </div>
-        <span class="badge ${subdivisionBadgeClass}">${subdivisionBadgeLabel}</span>
+        <div class="subdivision-badges">
+          ${subdivisionNeedTakeoffCount > 0 ? `<span class="need-takeoff-badge">Need Takeoff <span class="need-takeoff-count">${subdivisionNeedTakeoffCount}</span></span>` : ""}
+          <span class="badge ${subdivisionBadgeClass}">${subdivisionBadgeLabel}</span>
+        </div>
       </summary>
       <div class="lots-grid"></div>
     `;
@@ -2091,6 +2527,10 @@ function renderDashboard(dataRows, sourceName = "Uploaded file") {
           <div class="lot-head">
             <h3 class="lot-name">Lot ${escapeHtml(lot.displayName)}</h3>
             <div class="lot-head-actions">
+              <div class="lot-badges">
+                ${lot.needTakeoffCount > 0 && !lot.completed ? `<span class="need-takeoff-badge">Need Takeoff <span class="need-takeoff-count">${lot.needTakeoffCount}</span></span>` : ""}
+                ${lot.supplyGapCount > 0 && !lot.completed ? `<span class="lot-supply-gap">⚠ ${lot.supplyGapCount} gap${lot.supplyGapCount > 1 ? "s" : ""}</span>` : ""}
+              </div>
               <label class="lot-complete-control">
                 <input
                   type="checkbox"
@@ -2113,29 +2553,89 @@ function renderDashboard(dataRows, sourceName = "Uploaded file") {
                 <th>Requested Start</th>
                 <th>Category</th>
                 <th>Status</th>
+                <th>Takeoff</th>
               </tr>
             </thead>
             <tbody>
               ${lot.tasks
                 .map(
-                  (task, index) => `
-                  <tr>
+                  (task, index) => {
+                    const takeoffKey = task.key;
+                    const takeoffValue = taskTakeoffStatus.get(takeoffKey) || "";
+                    const takeoffOrderDateValue = taskTakeoffOrderDate.get(takeoffKey) || "";
+                    const takeoffEtaValue = taskTakeoffEta.get(takeoffKey) || "";
+                    const scheduleValue = taskSchedulingStatus.get(takeoffKey) || "";
+                    const taskCompleteChecked = task.completed ? "checked" : "";
+                    const rowClass = task.completed ? "task-row-complete" : "";
+                    const scheduleClass = scheduleValue ? `schedule-${scheduleValue}` : "";
+                    const resolvedEta = resolveTaskEta(takeoffValue, takeoffEtaValue, takeoffOrderDateValue, task.leadDays);
+                    const takeoffClass = takeoffValue ? `takeoff-${takeoffValue}` : "";
+                    const supplyStatus = computeSupplyStatus(takeoffValue, resolvedEta, task.requestedStartDate);
+
+                    let etaHtml = "";
+                    if (takeoffValue === "ordered") {
+                      const badgeHtml = supplyStatus
+                        ? `<span class="badge ${supplyStatus.badgeClass}">${supplyStatus.label}</span>`
+                        : "";
+                      const etaHint = resolvedEta
+                        ? `<span class="takeoff-eta-hint">${takeoffEtaValue ? "Vendor ETA" : "Auto ETA"}: ${escapeHtml(resolvedEta)}</span>`
+                        : `<span class="takeoff-eta-hint">Set Order Date to auto-calculate ETA.</span>`;
+                      etaHtml = `
+                      <div class="takeoff-order-row">
+                        <span class="takeoff-label">Order</span>
+                        <input type="date" class="takeoff-order-date" data-takeoff-key="${escapeHtml(takeoffKey)}" value="${escapeHtml(takeoffOrderDateValue)}" title="Date the order was placed" />
+                      </div>
+                      <div class="takeoff-eta-row">
+                        <span class="takeoff-label">ETA</span>
+                        <input type="date" class="takeoff-eta" data-takeoff-key="${escapeHtml(takeoffKey)}" value="${escapeHtml(takeoffEtaValue)}" title="Vendor-confirmed ETA (optional override)" />
+                        ${badgeHtml}
+                      </div>
+                      ${etaHint}`;
+                    } else if (takeoffValue === "received") {
+                      etaHtml = `<span class="badge supply-badge-ready">Ready</span>`;
+                    }
+
+                    return `
+                  <tr class="${rowClass}">
                     <td data-label="Task">
                       <div class="task-name-cell">
-                        <button
-                          type="button"
-                          class="task-name-button task-name-${task.severity.css}"
-                          data-task-detail-id="${escapeHtml(`task-detail-${lot.name}-${index}`)}"
-                          aria-expanded="false"
-                        >${escapeHtml(task.taskDisplayName)}</button>
+                        <div class="task-name-top">
+                          <button
+                            type="button"
+                            class="task-name-button task-name-${task.severity.css}"
+                            data-task-detail-id="${escapeHtml(`task-detail-${lot.name}-${index}`)}"
+                            aria-expanded="false"
+                          >${escapeHtml(task.taskDisplayName)}</button>
+                          <label class="task-complete-control">
+                            <input type="checkbox" class="task-complete-toggle" data-task-key="${escapeHtml(task.key)}" ${taskCompleteChecked} />
+                            <span>Done</span>
+                          </label>
+                        </div>
                         <div id="${escapeHtml(`task-detail-${lot.name}-${index}`)}" class="task-detail" hidden>${escapeHtml(task.taskName)}</div>
                       </div>
                     </td>
                     <td data-label="Requested Start">${escapeHtml(task.requestedStartDisplay)}</td>
                     <td data-label="Category">${escapeHtml(task.ruleLabel)}</td>
-                    <td data-label="Status" class="task-status"><span class="badge status-${task.severity.css}">${task.severity.label}</span></td>
+                    <td data-label="Status" class="task-status"><span class="badge ${task.completed ? "status-complete" : `status-${task.severity.css}`}">${task.completed ? "Complete" : task.severity.label}</span></td>
+                    <td data-label="Takeoff" class="task-takeoff">
+                      <div class="takeoff-cell">
+                        <select class="takeoff-select ${takeoffClass}" data-takeoff-key="${escapeHtml(takeoffKey)}">
+                          <option value="">—</option>
+                          <option value="need-takeoff" ${takeoffValue === "need-takeoff" ? "selected" : ""}>Need Takeoff</option>
+                          <option value="ordered" ${takeoffValue === "ordered" ? "selected" : ""}>Ordered</option>
+                          <option value="received" ${takeoffValue === "received" ? "selected" : ""}>Received</option>
+                        </select>
+                        <select class="task-schedule-select ${scheduleClass}" data-schedule-key="${escapeHtml(takeoffKey)}" title="Labor scheduling status">
+                          <option value="">Scheduling —</option>
+                          <option value="needs-scheduling" ${scheduleValue === "needs-scheduling" ? "selected" : ""}>Needs Scheduling</option>
+                          <option value="scheduled" ${scheduleValue === "scheduled" ? "selected" : ""}>Scheduled</option>
+                        </select>
+                        ${etaHtml}
+                      </div>
+                    </td>
                   </tr>
-                `
+                `;
+                  }
                 )
                 .join("")}
             </tbody>
@@ -2152,10 +2652,14 @@ function renderDashboard(dataRows, sourceName = "Uploaded file") {
     dashboard.innerHTML = `<div class="empty">No subdivisions or lots match your current filter.</div>`;
   }
 
-  const filtersActive = filterText || statusValue !== "all";
+  const filtersActive = filterText || statusValue !== "all" || supplyGapFilter || needTakeoffFilter;
   if (filtersActive) {
     const statusLabel = statusValue === "all" ? "All" : severityDefinitions[statusValue].label;
-    summary.innerHTML += `<p class="active-filter">Showing ${renderedSubdivisionCount} subdivisions and ${renderedLotCount} lots after filtering. Status: ${escapeHtml(statusLabel)}.</p>`;
+    const extras = [];
+    if (needTakeoffFilter) extras.push("Need Takeoff");
+    if (supplyGapFilter) extras.push("Supply Gaps");
+    const extraLabel = extras.length > 0 ? ` Filters: ${escapeHtml(extras.join(", "))}.` : "";
+    summary.innerHTML += `<p class="active-filter">Showing ${renderedSubdivisionCount} subdivisions and ${renderedLotCount} lots after filtering. Status: ${escapeHtml(statusLabel)}.${extraLabel}</p>`;
   }
 }
 
@@ -2193,13 +2697,18 @@ function groupRows(dataRows, rules) {
     const lot = subdivision.lots.get(lotName);
     const match = getRuleMatch(taskName, rules);
     const severity = evaluateSeverity(requestedStartDate, match.days);
+    const taskKey = getTaskCompletionKey(lot.key, taskName, requestedStartRaw || "N/A");
 
     lot.tasks.push({
+      key: taskKey,
       taskName,
       taskDisplayName: getTaskDisplayName(taskName),
       requestedStartDisplay: requestedStartRaw || "N/A",
       requestedStartDate,
       ruleLabel: match.label,
+      isKeywordMatch: match.keywords?.length > 0,
+      leadDays: Number.isFinite(match.days) ? match.days : 0,
+      completed: taskCompletionStatus.get(taskKey) === true,
       severity
     });
     taskCount += 1;
@@ -2221,12 +2730,15 @@ function groupRows(dataRows, rules) {
 
       lot.displayName = formatLotDisplayName(lot.name);
 
-      const firstTask = lot.tasks[0] || null;
-      const lotSeverity = firstTask ? firstTask.severity : severityDefinitions.safe;
+      const activeTasks = lot.tasks.filter((task) => !task.completed);
+      const firstActiveTask = activeTasks[0] || null;
+      const lotSeverity = firstActiveTask ? firstActiveTask.severity : severityDefinitions.safe;
 
       lot.lotSeverity = lotSeverity;
-      lot.earliestStartDisplay = firstTask ? firstTask.requestedStartDisplay : "N/A";
-      lot.earliestTaskName = firstTask ? firstTask.taskDisplayName : "No tasks";
+      lot.earliestStartDisplay = firstActiveTask ? firstActiveTask.requestedStartDisplay : "N/A";
+      lot.earliestTaskName = firstActiveTask ? firstActiveTask.taskDisplayName : "All tasks complete";
+      lot.supplyGapCount = activeTasks.filter((t) => isSupplyGap(t, lot.key)).length;
+      lot.needTakeoffCount = activeTasks.filter((task) => taskTakeoffStatus.get(task.key) === "need-takeoff").length;
       subdivisionMaxSeverity = lotSeverity.rank > subdivisionMaxSeverity.rank ? lotSeverity : subdivisionMaxSeverity;
       lots.push(lot);
       lotCount += 1;
@@ -2234,6 +2746,7 @@ function groupRows(dataRows, rules) {
 
     lots.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
     subdivision.lots = lots;
+    subdivision.needTakeoffCount = lots.reduce((sum, lot) => sum + lot.needTakeoffCount, 0);
     subdivision.maxSeverity = subdivisionMaxSeverity;
     subdivisions.push(subdivision);
   }
@@ -2470,9 +2983,14 @@ function persistCompletedLots() {
 function exportCompletedLots() {
   try {
     const payload = {
-      version: 1,
+      version: 5,
       exportedAt: new Date().toISOString(),
-      completedLotKeys: [...completedLotKeys].sort()
+      completedLotKeys: [...completedLotKeys].sort(),
+      taskTakeoffStatus: Object.fromEntries(taskTakeoffStatus),
+      taskTakeoffEta: Object.fromEntries(taskTakeoffEta),
+      taskTakeoffOrderDate: Object.fromEntries(taskTakeoffOrderDate),
+      taskSchedulingStatus: Object.fromEntries(taskSchedulingStatus),
+      taskCompletionStatus: Object.fromEntries(taskCompletionStatus)
     };
 
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -2518,6 +3036,96 @@ async function importCompletedLots(file, mode = "replace") {
     } else {
       completedLotKeys = importedSet;
     }
+
+    // Handle takeoff status import
+    if (parsed?.taskTakeoffStatus && typeof parsed.taskTakeoffStatus === "object" && !Array.isArray(parsed.taskTakeoffStatus)) {
+      const importedTakeoff = new Map(
+        Object.entries(parsed.taskTakeoffStatus)
+          .filter(([, v]) => ["need-takeoff", "ordered", "received"].includes(v))
+      );
+      if (mode === "merge") {
+        for (const [k, v] of importedTakeoff) {
+          taskTakeoffStatus.set(k, v);
+        }
+      } else {
+        taskTakeoffStatus = importedTakeoff;
+      }
+    } else if (mode === "replace") {
+      taskTakeoffStatus = new Map();
+    }
+    persistTakeoffStatus();
+
+    // Handle takeoff ETA import
+    if (parsed?.taskTakeoffEta && typeof parsed.taskTakeoffEta === "object" && !Array.isArray(parsed.taskTakeoffEta)) {
+      const importedEta = new Map(
+        Object.entries(parsed.taskTakeoffEta)
+          .filter(([, v]) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v))
+      );
+      if (mode === "merge") {
+        for (const [k, v] of importedEta) {
+          taskTakeoffEta.set(k, v);
+        }
+      } else {
+        taskTakeoffEta = importedEta;
+      }
+    } else if (mode === "replace") {
+      taskTakeoffEta = new Map();
+    }
+    persistTakeoffEta();
+
+    // Handle takeoff order date import
+    if (parsed?.taskTakeoffOrderDate && typeof parsed.taskTakeoffOrderDate === "object" && !Array.isArray(parsed.taskTakeoffOrderDate)) {
+      const importedOrderDate = new Map(
+        Object.entries(parsed.taskTakeoffOrderDate)
+          .filter(([, v]) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v))
+      );
+      if (mode === "merge") {
+        for (const [k, v] of importedOrderDate) {
+          taskTakeoffOrderDate.set(k, v);
+        }
+      } else {
+        taskTakeoffOrderDate = importedOrderDate;
+      }
+    } else if (mode === "replace") {
+      taskTakeoffOrderDate = new Map();
+    }
+    persistTakeoffOrderDate();
+
+    // Handle task scheduling status import
+    if (parsed?.taskSchedulingStatus && typeof parsed.taskSchedulingStatus === "object" && !Array.isArray(parsed.taskSchedulingStatus)) {
+      const importedScheduling = new Map(
+        Object.entries(parsed.taskSchedulingStatus)
+          .filter(([, v]) => ["needs-scheduling", "scheduled"].includes(v))
+      );
+      if (mode === "merge") {
+        for (const [k, v] of importedScheduling) {
+          taskSchedulingStatus.set(k, v);
+        }
+      } else {
+        taskSchedulingStatus = importedScheduling;
+      }
+    } else if (mode === "replace") {
+      taskSchedulingStatus = new Map();
+    }
+    persistTaskSchedulingStatus();
+
+    // Handle task completion status import
+    if (parsed?.taskCompletionStatus && typeof parsed.taskCompletionStatus === "object" && !Array.isArray(parsed.taskCompletionStatus)) {
+      const importedTaskCompletion = new Map(
+        Object.entries(parsed.taskCompletionStatus)
+          .filter(([, v]) => v === true)
+      );
+      if (mode === "merge") {
+        for (const [k, v] of importedTaskCompletion) {
+          taskCompletionStatus.set(k, v);
+        }
+      } else {
+        taskCompletionStatus = importedTaskCompletion;
+      }
+    } else if (mode === "replace") {
+      taskCompletionStatus = new Map();
+    }
+    persistTaskCompletionStatus();
 
     completionUndoStack = [];
     completionRedoStack = [];
@@ -2617,6 +3225,216 @@ function clearLegacyWorkbookStorage() {
     }
   } catch (error) {
     console.error("Failed to clear legacy workbook storage:", error);
+  }
+}
+
+function getTaskCompletionKey(lotKey, taskName, requestedStartDisplay) {
+  return `${lotKey}||${String(taskName || "").trim().toLowerCase()}||${String(requestedStartDisplay || "").trim()}`;
+}
+
+function getTaskTakeoffKey(lotKey, taskName, requestedStartDisplay) {
+  return getTaskCompletionKey(lotKey, taskName, requestedStartDisplay);
+}
+
+function isSupplyGap(task, lotKey) {
+  if (task.completed) {
+    return false;
+  }
+
+  const key = getTaskTakeoffKey(lotKey, task.taskName, task.requestedStartDisplay);
+  const scheduling = taskSchedulingStatus.get(key) || "";
+  if (scheduling === "needs-scheduling") {
+    return true;
+  }
+
+  const status = taskTakeoffStatus.get(key) || "";
+
+  // If manually tagged, evaluate based on resolution
+  if (status) {
+    if (status === "received") return false;
+    const eta = resolveTaskEta(
+      status,
+      taskTakeoffEta.get(key) || "",
+      taskTakeoffOrderDate.get(key) || "",
+      task.leadDays
+    );
+    const supply = computeSupplyStatus(status, eta, task.requestedStartDate);
+    // Ordered + on-track ETA is resolved
+    if (status === "ordered" && supply?.label === "On Track") return false;
+    return true; // need-takeoff, ordered with no/late ETA
+  }
+
+  // Not tagged: flag only tasks that matched a specific lead-time rule (not the general fallback)
+  return task.isKeywordMatch === true;
+}
+
+function computeSupplyStatus(takeoffValue, eta, taskStartDate) {
+  if (takeoffValue === "received") {
+    return { label: "Ready", badgeClass: "supply-badge-ready" };
+  }
+  if (takeoffValue !== "ordered" || !eta) {
+    return null;
+  }
+  const etaDate = parseDate(eta);
+  if (!etaDate) return null;
+  if (!taskStartDate) return { label: "ETA Set", badgeClass: "supply-badge-good" };
+  // ETA on or before task start date means materials will arrive in time
+  return etaDate <= taskStartDate
+    ? { label: "On Track", badgeClass: "supply-badge-good" }
+    : { label: "Late ETA", badgeClass: "supply-badge-late" };
+}
+
+function resolveTaskEta(takeoffValue, manualEta, orderDate, leadDays) {
+  if (takeoffValue !== "ordered") {
+    return "";
+  }
+
+  if (isIsoDateString(manualEta)) {
+    return manualEta;
+  }
+
+  if (!isIsoDateString(orderDate) || !Number.isFinite(leadDays) || leadDays < 0) {
+    return "";
+  }
+
+  return addDaysToIsoDate(orderDate, leadDays);
+}
+
+function addDaysToIsoDate(dateValue, days) {
+  const base = parseDate(dateValue);
+  if (!base || !Number.isFinite(days)) {
+    return "";
+  }
+
+  const shifted = new Date(base.getTime());
+  shifted.setDate(shifted.getDate() + Math.round(days));
+  const year = shifted.getFullYear();
+  const month = String(shifted.getMonth() + 1).padStart(2, "0");
+  const day = String(shifted.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function isIsoDateString(value) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function persistTakeoffStatus() {
+  try {
+    localStorage.setItem(LOT_TAKEOFF_STATUS_STORAGE_KEY, JSON.stringify(Object.fromEntries(taskTakeoffStatus)));
+  } catch (error) {
+    console.error("Failed to persist takeoff status:", error);
+  }
+}
+
+function restoreTakeoffStatus() {
+  try {
+    const stored = localStorage.getItem(LOT_TAKEOFF_STATUS_STORAGE_KEY);
+    if (!stored) return new Map();
+    const parsed = JSON.parse(stored);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return new Map();
+    return new Map(
+      Object.entries(parsed)
+        .filter(([, v]) => ["need-takeoff", "ordered", "received"].includes(v))
+    );
+  } catch (error) {
+    console.error("Failed to restore takeoff status:", error);
+    return new Map();
+  }
+}
+
+function persistTakeoffEta() {
+  try {
+    localStorage.setItem(LOT_TAKEOFF_ETA_STORAGE_KEY, JSON.stringify(Object.fromEntries(taskTakeoffEta)));
+  } catch (error) {
+    console.error("Failed to persist takeoff ETA:", error);
+  }
+}
+
+function restoreTakeoffEta() {
+  try {
+    const stored = localStorage.getItem(LOT_TAKEOFF_ETA_STORAGE_KEY);
+    if (!stored) return new Map();
+    const parsed = JSON.parse(stored);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return new Map();
+    return new Map(
+      Object.entries(parsed)
+        .filter(([, v]) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v))
+    );
+  } catch (error) {
+    console.error("Failed to restore takeoff ETA:", error);
+    return new Map();
+  }
+}
+
+function persistTakeoffOrderDate() {
+  try {
+    localStorage.setItem(LOT_TAKEOFF_ORDER_DATE_STORAGE_KEY, JSON.stringify(Object.fromEntries(taskTakeoffOrderDate)));
+  } catch (error) {
+    console.error("Failed to persist takeoff order date:", error);
+  }
+}
+
+function restoreTakeoffOrderDate() {
+  try {
+    const stored = localStorage.getItem(LOT_TAKEOFF_ORDER_DATE_STORAGE_KEY);
+    if (!stored) return new Map();
+    const parsed = JSON.parse(stored);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return new Map();
+    return new Map(
+      Object.entries(parsed)
+        .filter(([, v]) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v))
+    );
+  } catch (error) {
+    console.error("Failed to restore takeoff order date:", error);
+    return new Map();
+  }
+}
+
+function persistTaskSchedulingStatus() {
+  try {
+    localStorage.setItem(LOT_TASK_SCHEDULING_STATUS_STORAGE_KEY, JSON.stringify(Object.fromEntries(taskSchedulingStatus)));
+  } catch (error) {
+    console.error("Failed to persist task scheduling status:", error);
+  }
+}
+
+function restoreTaskSchedulingStatus() {
+  try {
+    const stored = localStorage.getItem(LOT_TASK_SCHEDULING_STATUS_STORAGE_KEY);
+    if (!stored) return new Map();
+    const parsed = JSON.parse(stored);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return new Map();
+    return new Map(
+      Object.entries(parsed)
+        .filter(([, v]) => ["needs-scheduling", "scheduled"].includes(v))
+    );
+  } catch (error) {
+    console.error("Failed to restore task scheduling status:", error);
+    return new Map();
+  }
+}
+
+function persistTaskCompletionStatus() {
+  try {
+    localStorage.setItem(LOT_TASK_COMPLETION_STORAGE_KEY, JSON.stringify(Object.fromEntries(taskCompletionStatus)));
+  } catch (error) {
+    console.error("Failed to persist task completion status:", error);
+  }
+}
+
+function restoreTaskCompletionStatus() {
+  try {
+    const stored = localStorage.getItem(LOT_TASK_COMPLETION_STORAGE_KEY);
+    if (!stored) return new Map();
+    const parsed = JSON.parse(stored);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return new Map();
+    return new Map(
+      Object.entries(parsed)
+        .filter(([, v]) => v === true)
+    );
+  } catch (error) {
+    console.error("Failed to restore task completion status:", error);
+    return new Map();
   }
 }
 
