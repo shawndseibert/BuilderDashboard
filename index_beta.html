@@ -1609,6 +1609,7 @@ button.danger:hover {
           <div class="transfer-actions">
             <button id="exportCompletedBtn" class="secondary" type="button">Export Completed List</button>
             <button id="importCompletedBtn" class="secondary" type="button">Import Completed List</button>
+            <button id="exportTakeoffReportBtn" class="secondary" type="button">Export Takeoff Report</button>
           </div>
           <label class="transfer-mode" for="completedImportMode">
             <span>Import Mode</span>
@@ -1691,6 +1692,7 @@ const selectedFileModal = document.getElementById("selectedFileModal");
 const selectedFileSettings = document.getElementById("selectedFileSettings");
 const exportCompletedBtn = document.getElementById("exportCompletedBtn");
 const importCompletedBtn = document.getElementById("importCompletedBtn");
+const exportTakeoffReportBtn = document.getElementById("exportTakeoffReportBtn");
 const completedListImportInput = document.getElementById("completedListImportInput");
 const completedImportMode = document.getElementById("completedImportMode");
 const transferStatus = document.getElementById("transferStatus");
@@ -1827,6 +1829,10 @@ chooseFileSettingsBtn.addEventListener("click", () => {
 
 exportCompletedBtn.addEventListener("click", () => {
   exportCompletedLots();
+});
+
+exportTakeoffReportBtn.addEventListener("click", () => {
+  exportTakeoffReport();
 });
 
 importCompletedBtn.addEventListener("click", () => {
@@ -2329,6 +2335,10 @@ function detectColumns(firstRow) {
   if (!columnMap["Adjusted Start Date"]) {
     columnMap["Adjusted Start Date"] = findColumn(["date"]);
   }
+
+  // Optional report columns
+  columnMap["Plan Name"] = findColumn(["plan name", "plan", "model"]);
+  columnMap["Options"] = findColumn(["options", "option", "selections", "upgrades", "upgrades/options"]);
   
   columnMap["Status"] = findColumn(["status"]);
   
@@ -2672,6 +2682,8 @@ function groupRows(dataRows, rules) {
     const subdivisionName = safeValue(row["Subdivision"]);
     const lotName = safeValue(row["Lot / Block"]);
     const taskName = safeValue(row["Task"]);
+    const planName = optionalValue(row["Plan Name"]);
+    const options = optionalValue(row["Options"]);
     // All sheets are normalized to use "Adjusted Start Date" by detectColumns
     const requestedStartRaw = safeValue(row["Adjusted Start Date"]);
     const requestedStartDate = parseDate(requestedStartRaw);
@@ -2705,6 +2717,8 @@ function groupRows(dataRows, rules) {
       taskDisplayName: getTaskDisplayName(taskName),
       requestedStartDisplay: requestedStartRaw || "N/A",
       requestedStartDate,
+      planName,
+      options,
       ruleLabel: match.label,
       isKeywordMatch: match.keywords?.length > 0,
       leadDays: Number.isFinite(match.days) ? match.days : 0,
@@ -2863,6 +2877,21 @@ function safeValue(value) {
   return String(value).trim();
 }
 
+function optionalValue(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  return String(value).trim();
+}
+
+function toCsvCell(value) {
+  const text = String(value ?? "");
+  if (/[",\r\n]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+}
+
 function renderEmpty(message) {
   setSetupState(false);
   summary.innerHTML = "";
@@ -3009,6 +3038,120 @@ function exportCompletedLots() {
     console.error("Failed to export completed lots:", error);
     setTransferStatus("Could not export completed list.", "error");
   }
+}
+
+function exportTakeoffReport() {
+  if (rows.length === 0) {
+    setTransferStatus("Load a spreadsheet before exporting the takeoff report.", "error");
+    return;
+  }
+
+  try {
+    const grouped = groupRows(rows, getRules());
+    const reportMap = new Map();
+
+    for (const subdivision of grouped.subdivisions) {
+      for (const lot of subdivision.lots) {
+        for (const task of lot.tasks) {
+          if (task.completed) {
+            continue;
+          }
+
+          const takeoffValue = taskTakeoffStatus.get(task.key) || "";
+          if (takeoffValue !== "need-takeoff") {
+            continue;
+          }
+
+          const takeoffNeeded = getTakeoffReportLabel(task);
+          const rowKey = [subdivision.name, lot.displayName, takeoffNeeded].join("||");
+          const existing = reportMap.get(rowKey);
+          if (existing) {
+            existing.planNames.add(optionalValue(task.planName));
+            existing.options.add(optionalValue(task.options));
+          } else {
+            reportMap.set(rowKey, {
+              subdivision: subdivision.name,
+              lot: lot.displayName,
+              takeoffNeeded,
+              planNames: new Set([optionalValue(task.planName)]),
+              options: new Set([optionalValue(task.options)])
+            });
+          }
+        }
+      }
+    }
+
+    const reportRows = [...reportMap.values()]
+      .map((row) => ({
+        subdivision: row.subdivision,
+        lot: row.lot,
+        takeoffNeeded: row.takeoffNeeded,
+        planName: [...row.planNames].filter(Boolean).join("; "),
+        options: [...row.options].filter(Boolean).join("; ")
+      }))
+      .sort((a, b) => {
+        const bySubdivision = a.subdivision.localeCompare(b.subdivision, undefined, { sensitivity: "base" });
+        if (bySubdivision !== 0) return bySubdivision;
+        const byLot = a.lot.localeCompare(b.lot, undefined, { numeric: true, sensitivity: "base" });
+        if (byLot !== 0) return byLot;
+        return a.takeoffNeeded.localeCompare(b.takeoffNeeded, undefined, { sensitivity: "base" });
+      });
+
+    if (reportRows.length === 0) {
+      setTransferStatus("No tasks are currently marked Need Takeoff.", "error");
+      return;
+    }
+
+    const headers = ["Subdivision", "Lot Number", "Takeoff Needed", "Plan Name", "Options"];
+    const csvLines = [headers.join(",")];
+
+    for (const row of reportRows) {
+      csvLines.push([
+        toCsvCell(row.subdivision),
+        toCsvCell(row.lot),
+        toCsvCell(row.takeoffNeeded),
+        toCsvCell(row.planName),
+        toCsvCell(row.options)
+      ].join(","));
+    }
+
+    const blob = new Blob([csvLines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const dateTag = new Date().toISOString().slice(0, 10);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `builder-dashboard-takeoff-report-${dateTag}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+
+    setTransferStatus(`Exported ${reportRows.length} takeoff rows.`, "success");
+  } catch (error) {
+    console.error("Failed to export takeoff report:", error);
+    setTransferStatus("Could not export takeoff report.", "error");
+  }
+}
+
+function getTakeoffReportLabel(task) {
+  const normalizedRule = String(task.ruleLabel || "").toLowerCase();
+  const normalizedTask = String(task.taskName || "").toLowerCase();
+  const combined = `${normalizedRule} ${normalizedTask}`;
+
+  if (/(lumber|framing|panel|joist|truss|sheathing|floor system|i-joist)/.test(combined)) {
+    return "Lumber";
+  }
+  if (/(window|glass)/.test(combined)) {
+    return "Windows";
+  }
+  if (/(door|doors)/.test(combined)) {
+    return "Doors";
+  }
+  if (/(stair|stairs)/.test(combined)) {
+    return "Stairs";
+  }
+
+  return task.ruleLabel || task.taskDisplayName || "Takeoff";
 }
 
 async function importCompletedLots(file, mode = "replace") {
